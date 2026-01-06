@@ -24,6 +24,25 @@ def page() -> None:
     nodes = list(G.nodes())
     selected = st.multiselect("Select nodes to remove", nodes, [])
     recompute_on_largest = st.checkbox("Recompute on largest component if disconnected", value=True)
+    # Compute and display the Kemeny constant after removals
+    if selected:
+        result = interactive_kemeny(G, selected, recompute_on_largest)
+        if result.kemeny == result.kemeny:  # not NaN
+            st.metric("Kemeny constant after removals", f"{result.kemeny:.3f}")
+        else:
+            st.warning("Kemeny constant is undefined for the selected removals.")
+        # Plot the history of Kemeny values as nodes are removed sequentially
+        st.subheader("Kemeny constant after each removal")
+        fig, ax = plt.subplots()
+        x_vals = list(range(0, len(result.history) + 1))
+        ax.plot(x_vals, list(base_k, result.history), marker="o")
+        ax.set_xlabel("Number of removed nodes")
+        ax.set_ylabel("Kemeny constant")
+        ax.set_title("Kemeny constant versus number of removed nodes")
+        st.pyplot(fig)
+    else:
+        st.info("Select nodes from the list above to remove them and recompute the Kemeny constant.")
+    
     # Show the current network with removed nodes highlighted
     st.subheader("Network view (removed nodes highlighted)")
     if selected:
@@ -44,24 +63,7 @@ def page() -> None:
             title="Network (no removals yet)",
             show_labels=True,
         )
-    # Compute and display the Kemeny constant after removals
-    if selected:
-        result = interactive_kemeny(G, selected, recompute_on_largest)
-        if result.kemeny == result.kemeny:  # not NaN
-            st.metric("Kemeny constant after removals", f"{result.kemeny:.3f}")
-        else:
-            st.warning("Kemeny constant is undefined for the selected removals.")
-        # Plot the history of Kemeny values as nodes are removed sequentially
-        st.subheader("Kemeny constant after each removal")
-        fig, ax = plt.subplots()
-        x_vals = list(range(1, len(result.history) + 1))
-        ax.plot(x_vals, result.history, marker="o")
-        ax.set_xlabel("Number of removed nodes")
-        ax.set_ylabel("Kemeny constant")
-        ax.set_title("Kemeny constant versus number of removed nodes")
-        st.pyplot(fig)
-    else:
-        st.info("Select nodes from the list above to remove them and recompute the Kemeny constant.")
+    
 
 
 if __name__ == "__main__":
