@@ -7,7 +7,7 @@ clustering.  A summary of each role cluster is provided in terms of
 basic centrality statistics.
 """
 
-from typing import Dict, Any, Optional, Tuple, Callable
+from typing import Dict, Any, Optional, Tuple, Callable, List
 import numpy as np
 import pandas as pd
 import networkx as nx
