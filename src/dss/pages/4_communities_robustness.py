@@ -12,7 +12,6 @@ from dss.analytics.roles import compute_roles
 
 
 def page() -> None:
-    import pandas as pd
     st.set_page_config(page_title="Communities & Robustness", layout="wide")
     st.title("Community Detection and Robustness")
     init_state()
@@ -82,6 +81,7 @@ def page() -> None:
     st.subheader("Comparison with role clustering")
     # Compute role result if not already
     if get_state("role_result") is None:
+        import pandas as pd  # imported here to avoid top-level import issues
         from dss.analytics.centrality import compute_centralities
         centrality_table = compute_centralities(G)
         role_result = compute_roles(G, centrality_table=centrality_table)
