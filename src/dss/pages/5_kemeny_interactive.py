@@ -401,7 +401,7 @@ def page() -> None:
     result = interactive_kemeny_edges(G, ordered_edges, recompute_on_largest)
 
     # === MAIN CONTENT ROW: constants | plot | graph ===
-    col_const, col_plot = st.columns([1, 3])
+    col_const, col_plot = st.columns([1, 2])
 
     with col_const:
         st.markdown("### Kemeny constants")
