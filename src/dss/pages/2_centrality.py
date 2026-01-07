@@ -45,7 +45,9 @@ def page() -> None:
         st.sidebar.header("Measure scheme")
         for col in df.columns:
             weight_inputs[col] = st.sidebar.toggle(label=str(col))
-        combined = borda_count(df)
+        # combined = borda_count(df)
+        combined = borda_count(df, weight_inputs)
+
     
     # Display centrality table
     st.dataframe(df.assign(combined=combined).sort_values("combined", ascending=False))
