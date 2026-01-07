@@ -207,7 +207,6 @@
 #========================================================================================
 
 
-
 # File: src/dss/pages/5_kemeny_interactive.py
 """Streamlit page: Kemeny constant analysis with interactive EDGE removal."""
 
@@ -233,7 +232,6 @@ def _edge_label(G: nx.Graph, e: Edge) -> str:
 
 
 def _build_label_to_edge(G: nx.Graph) -> Dict[str, Edge]:
-    # Stable ordering by string label
     edges: List[Edge] = list(G.edges())
     labels = [_edge_label(G, e) for e in edges]
     pairs = sorted(zip(labels, edges), key=lambda x: x[0])
@@ -245,23 +243,16 @@ def _sync_order_with_selection(
     label_to_edge: Dict[str, Edge],
     state_key: str = "kemeny_edge_order",
 ) -> List[str]:
-    """
-    Keep st.session_state[state_key] as the ordered list of selected edge labels.
-
-    - Remove labels that are no longer selected
-    - Append newly selected labels at the end
-    - Preserve existing order for the rest
-    """
     if state_key not in st.session_state:
         st.session_state[state_key] = []
 
     current: List[str] = list(st.session_state[state_key])
     selected_set = set(selected_labels)
 
-    # Remove unselected
+    # Remove items no longer selected
     current = [lbl for lbl in current if lbl in selected_set]
 
-    # Append new selections in stable order (sorted labels to be deterministic)
+    # Append newly selected labels at the end, deterministic
     for lbl in sorted(selected_set):
         if lbl not in current and lbl in label_to_edge:
             current.append(lbl)
@@ -270,15 +261,155 @@ def _sync_order_with_selection(
     return current
 
 
-def _move_item(order: List[str], label: str, direction: int) -> List[str]:
+def _move_item_in_state(state_key: str, label: str, direction: int) -> None:
     """direction: -1 up, +1 down"""
+    order: List[str] = list(st.session_state.get(state_key, []))
     if label not in order:
-        return order
+        return
     i = order.index(label)
     j = i + direction
     if j < 0 or j >= len(order):
-        return order
+        return
     order[i], order[j] = order[j], order[i]
+    st.session_state[state_key] = order
+
+
+def page() -> None:
+    st.set_page_config(page_title="Kemeny Analysis", layout="wide")
+    st.title("Kemeny Constant and Connectivity Analysis")
+
+    init_state()
+    G = get_state("graph")
+    if G is None:
+        st.info("No graph loaded. Please upload a `.mtx` file on the Upload page.")
+        return
+
+    base_k = kemeny_constant(G)
+    st.metric("Kemeny constant (baseline)", f"{base_k:.3f}")
+
+    st.subheader("Remove edges and observe effect on Kemeny")
+
+    recompute_on_largest = st.checkbox(
+        "Recompute on largest component if disconnected",
+        value=True,
+    )
+
+    label_to_edge = _build_label_to_edge(G)
+    all_labels_sorted = list(label_to_edge.keys())
+
+    # Persist selection
+    selected_labels = st.multiselect(
+        "Select edges to remove",
+        options=all_labels_sorted,
+        default=st.session_state.get("kemeny_edge_selected", []),
+        key="kemeny_edge_selected",
+    )
+
+    # Sync and persist order
+    ordered_labels = _sync_order_with_selection(
+        selected_labels=selected_labels,
+        label_to_edge=label_to_edge,
+        state_key="kemeny_edge_order",
+    )
+
+    st.markdown("### Removal order")
+    st.caption("This order is used for the analysis. You can move edges up or down.")
+
+    if not ordered_labels:
+        st.info("Select edges above to start building a removal order.")
+        return
+
+    order_df = pd.DataFrame(
+        {
+            "#": list(range(1, len(ordered_labels) + 1)),
+            "Edge": ordered_labels,
+        }
+    )
+
+    col_left, col_right = st.columns([2, 1])
+
+    with col_left:
+        st.dataframe(order_df, use_container_width=True, hide_index=True)
+
+    with col_right:
+        # Persist which edge you are reordering
+        if "kemeny_edge_active" not in st.session_state:
+            st.session_state["kemeny_edge_active"] = ordered_labels[0]
+
+        # If active edge disappeared, set to first
+        if st.session_state["kemeny_edge_active"] not in ordered_labels:
+            st.session_state["kemeny_edge_active"] = ordered_labels[0]
+
+        active_label = st.selectbox(
+            "Edge to reorder",
+            options=ordered_labels,
+            key="kemeny_edge_active",
+        )
+
+        b1, b2 = st.columns(2)
+        with b1:
+            if st.button("Move up", use_container_width=True):
+                _move_item_in_state("kemeny_edge_order", active_label, -1)
+                st.rerun()
+        with b2:
+            if st.button("Move down", use_container_width=True):
+                _move_item_in_state("kemeny_edge_order", active_label, +1)
+                st.rerun()
+
+        if st.button("Remove from order", use_container_width=True):
+            st.session_state["kemeny_edge_order"] = [lbl for lbl in ordered_labels if lbl != active_label]
+            st.session_state["kemeny_edge_selected"] = [lbl for lbl in selected_labels if lbl != active_label]
+
+            # fix active selection
+            new_order = st.session_state["kemeny_edge_order"]
+            if new_order:
+                st.session_state["kemeny_edge_active"] = new_order[0]
+            st.rerun()
+
+    # Convert ordered labels -> edges
+    ordered_labels_final: List[str] = list(st.session_state["kemeny_edge_order"])
+    ordered_edges: List[Edge] = [label_to_edge[lbl] for lbl in ordered_labels_final]
+
+    result = interactive_kemeny_edges(G, ordered_edges, recompute_on_largest)
+
+    if result.kemeny == result.kemeny:
+        st.metric("Kemeny constant after removals", f"{result.kemeny:.3f}")
+    else:
+        st.warning("Kemeny constant is undefined for the selected removals.")
+
+    st.subheader("Kemeny constant after each removal")
+    fig, ax = plt.subplots()
+
+    kemeny_series = [base_k] + result.history
+    x_vals = list(range(0, len(kemeny_series)))
+
+    ax.plot(x_vals, kemeny_series, marker="o")
+    ax.set_xlabel("Number of removed edges")
+    ax.set_ylabel("Kemeny constant")
+    ax.grid()
+    ax.set_title("Kemeny constant versus number of removed edges")
+    st.pyplot(fig)
+
+    st.subheader("Network view (after removing edges)")
+    H = G.copy()
+    for u, v in ordered_edges:
+        if H.has_edge(u, v):
+            H.remove_edge(u, v)
+        elif (not H.is_directed()) and H.has_edge(v, u):
+            H.remove_edge(v, u)
+
+    display_network(
+        H,
+        node_size=None,
+        node_color=None,
+        highlight=[],
+        title="Graph after edge removals",
+        show_labels=True,
+    )
+
+
+if __name__ == "__main__":
+    page()
     return order
 
 
