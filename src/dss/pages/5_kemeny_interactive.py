@@ -45,7 +45,7 @@ def page() -> None:
         ax.set_xlabel("Number of removed nodes")
         ax.set_ylabel("Kemeny constant")
         # ax.set_ylim(bottom=max(kemeny_series) * 0.90)
-        fig.grid()
+        ax.grid()
         ax.set_title("Kemeny constant versus number of removed nodes")
         st.pyplot(fig)
         
