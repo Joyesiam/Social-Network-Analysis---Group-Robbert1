@@ -401,7 +401,7 @@ def page() -> None:
     result = interactive_kemeny_edges(G, ordered_edges, recompute_on_largest)
 
     # === MAIN CONTENT ROW: constants | plot | graph ===
-    col_const, col_plot, col_graph = st.columns([1, 1, 1])
+    col_const, col_plot = st.columns([1, 1])
 
     with col_const:
         st.markdown("### Kemeny constants")
@@ -421,25 +421,6 @@ def page() -> None:
         ax.grid()
         ax.set_title("Kemeny constant versus removal steps")
         st.pyplot(fig)
-
-    with col_graph:
-        st.markdown("### Network view (after removing edges)")
-        H = G.copy()
-        for u, v in ordered_edges:
-            if H.has_edge(u, v):
-                H.remove_edge(u, v)
-            elif (not H.is_directed()) and H.has_edge(v, u):
-                H.remove_edge(v, u)
-
-        display_network(
-            H,
-            node_size=None,
-            node_color=None,
-            highlight=[],
-            title="Graph after edge removals",
-            show_labels=True,
-            removed_edges=ordered_edges,
-        )
 
     # === BOTTOM: removal order table + reorder controls (1,1,3) ===
     st.markdown("### Removal order")
