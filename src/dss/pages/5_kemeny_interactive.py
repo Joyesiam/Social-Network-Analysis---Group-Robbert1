@@ -209,13 +209,14 @@ def page() -> None:
         st.markdown("### Kemeny constants")
         st.metric("Kemeny constant (baseline)", f"{base_k:.3f}")
 
-        if kemeny_defined and selected_widget:
-            st.metric(
-                "Kemeny constant (after removals)",
-                f"{after_k:.3f}",
-                delta=f"{delta:+.3f}",
-                delta_color="inverse",  # lower is better -> green when delta is negative
-            )
+        if kemeny_defined
+            if selected_widget:
+                    st.metric(
+                        "Kemeny constant (after removals)",
+                        f"{after_k:.3f}",
+                        delta=f"{delta:+.3f}",
+                        delta_color="inverse",  # lower is better -> green when delta is negative
+                    )
         else:
             st.warning("Kemeny constant is undefined for the selected removals.")
 
