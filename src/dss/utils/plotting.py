@@ -166,13 +166,6 @@
 
 
 
-
-
-
-
-
-
-
 """Graph plotting utilities.
 
 This module centralises the creation of network plots. It uses
@@ -334,7 +327,7 @@ def plot_network(
                 edgelist=[(u, v)],
                 ax=ax,
                 edge_color="red",
-                width=1.5,  # thicker so it stays visible
+                width=1.5,
                 alpha=1.0,
                 style=(0, (dash_on, dash_off)),
             )
@@ -368,3 +361,10 @@ if __name__ == "__main__":
     fig_demo = plot_network(G_demo, pos_demo, title="Cycle graph", removed_edges=removed_demo)
     fig_demo.savefig("_demo_plot.png")
     print("Demo plot saved to _demo_plot.png")
+
+
+
+
+
+
+
