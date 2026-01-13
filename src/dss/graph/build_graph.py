@@ -26,7 +26,7 @@ def build_graph(adjacency: csr_matrix, directed: Optional[bool] = False) -> nx.G
     Notes
     -----
     Recent versions of NetworkX (3.0 and above) have deprecated
-    ``from_scipy_sparse_matrix`` in favour of ``from_scipy_sparse_array``【372834749795475†L130-L135】.
+    ``from_scipy_sparse_matrix`` in favour of ``from_scipy_sparse_array``.
     To maintain compatibility across versions, this function manually
     constructs the graph by iterating over the non‑zero entries of the
     adjacency matrix.  This avoids reliance on deprecated API and
