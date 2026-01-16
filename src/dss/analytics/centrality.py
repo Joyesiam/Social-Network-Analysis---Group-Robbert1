@@ -18,7 +18,8 @@ from ..logging_config import get_logger
 logger = get_logger(__name__)
 
 
-def _safe_katz_centrality(G: nx.Graph, alpha: Optional[float] = None, beta: float = 1.0) -> Dict[Any, float]:
+# def _safe_katz_centrality(G: nx.Graph, alpha: Optional[float] = None, beta: float = 1.0) -> Dict[Any, float]:
+def _safe_katz_centrality(G: nx.Graph, alpha: Optional[float] = None, beta: float = 0.9) -> Dict[Any, float]:
     """Compute Katz centrality with a safe alpha.
 
     If `alpha` is None, estimate a stable value based on the largest
@@ -81,7 +82,8 @@ def compute_centralities(G: nx.Graph) -> pd.DataFrame:
     # Construct DataFrame
     df = pd.DataFrame(
         {
-            "degree": pd.Series(deg),
+            "degree": pd.Series(dict(G.degree())),
+            # "degree": pd.Series(deg),
             "katz": pd.Series(katz),
             "eigenvector": pd.Series(eigen),
             "betweenness": pd.Series(between),
@@ -129,18 +131,41 @@ def combine_centralities(df: pd.DataFrame, weights: Optional[Dict[str, float]] =
     return combined
 
 
-def borda_count(df: pd.DataFrame) -> pd.Series:
-    """Aggregate rankings via Borda count.
+# def borda_count(df: pd.DataFrame) -> pd.Series:
+#     """Aggregate rankings via Borda count.
 
-    Each centrality measure induces a ranking.  Nodes receive points
-    according to their rank (higher points for higher rank).  The sum of
-    points across measures yields an aggregated ranking.  Ties are
-    handled by assigning the average rank.  The returned Series has
-    smaller values for better ranks.
+#     Each centrality measure induces a ranking.  Nodes receive points
+#     according to their rank (higher points for higher rank).  The sum of
+#     points across measures yields an aggregated ranking.  Ties are
+#     handled by assigning the average rank.  The returned Series has
+#     smaller values for better ranks.
+#     """
+#     ranks = df.rank(ascending=False, method="average")
+#     borda_scores = ranks.mean(axis=1)
+#     return borda_scores
+
+def borda_count(
+    df: pd.DataFrame,
+    weight_inputs: Dict[str, bool],
+) -> pd.Series:
+    """Aggregate rankings via Borda count using enabled measures only.
+
+    Each enabled centrality measure induces a ranking.
+    Nodes receive higher scores for better ranks.
+    The final score is the average Borda score across enabled measures.
     """
-    ranks = df.rank(ascending=False, method="average")
-    borda_scores = ranks.mean(axis=1)
+    active_cols = [col for col, enabled in weight_inputs.items() if enabled]
+    # No measures selected: return zero scores
+    if not active_cols:
+        return pd.Series(0.0, index=df.index)
+
+    ranks = df[active_cols].rank(ascending=False, method="average")
+    n = len(df)
+    scores = (n + 1) - ranks
+    borda_scores = scores.mean(axis=1)
+
     return borda_scores
+
 
 
 def compute_centrality_result(G: nx.Graph, weights: Optional[Dict[str, float]] = None) -> CentralityResult:
