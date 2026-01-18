@@ -197,104 +197,59 @@ def page() -> None:
     """Render the Centrality Analysis page."""
     st.set_page_config(page_title="Centrality Analysis", layout="wide")
 
-    # --- Quick user guide (forced two-column layout via HTML flex) ---
-    # Why HTML?
-    # Streamlit's st.columns can collapse into a single column depending on
-    # viewport and content widths. For long explanatory text, flex is more stable.
-    left_html = """
-    <div class="guide-left">
-      <h2>Centrality Analysis - Quick User Guide</h2>
-      <h3>Centrality metrics (what do they mean?)</h3>
+    col_left, col_right = st.columns([2, 1])
 
-      <p><b>Degree</b><br/>
-      How many direct connections does a node have?<br/>
-      High score = very connected or popular.</p>
+    with col_left:
+        st.markdown("## Centrality Analysis – Quick User Guide")
+        st.markdown("### Centrality metrics")
 
-      <p><b>Eigenvector</b><br/>
-      Are you connected to other important nodes?<br/>
-      High score = influence through influential connections.</p>
+        st.markdown("**Degree**")
+        st.markdown("How many direct connections does a node have?")
+        st.markdown("High score means very connected or popular.")
 
-      <p><b>Katz</b><br/>
-      How far does your influence reach, directly and indirectly?<br/>
-      High score = strong reach through the network.</p>
+        st.markdown("**Eigenvector**")
+        st.markdown("Are you connected to other important nodes?")
+        st.markdown("High score means influence through influential connections.")
 
-      <p><b>Betweenness</b><br/>
-      How often do others need you to connect?<br/>
-      High score = you act as a bridge between groups.</p>
+        st.markdown("**Katz**")
+        st.markdown("How far does your influence reach, directly and indirectly?")
+        st.markdown("High score means strong reach through the network.")
 
-      <p><b>Closeness</b><br/>
-      How quickly can you reach everyone else?<br/>
-      High score = centrally located in terms of distance.</p>
+        st.markdown("**Betweenness**")
+        st.markdown("How often do others need you to connect?")
+        st.markdown("High score means you act as a bridge between groups.")
 
-      <p><b>PageRank</b><br/>
-      How much important attention flows to you?<br/>
-      High score = prestige or authority in the network.</p>
-    </div>
-    """
+        st.markdown("**Closeness**")
+        st.markdown("How quickly can you reach everyone else?")
+        st.markdown("High score means centrally located in terms of distance.")
 
-    right_html = """
-    <div class="guide-right">
-      <h3>Weighting scheme</h3>
-      <p>
-        Use the sliders to decide <b>which metrics matter most</b>.<br/>
-        Higher weight means more influence on the final score.
-      </p>
+        st.markdown("**PageRank**")
+        st.markdown("How much important attention flows to you?")
+        st.markdown("High score means prestige or authority in the network.")
 
-      <hr/>
+    with col_right:
+        # Using a container keeps this visually grouped without HTML
+        with st.container():
+            st.markdown("### Weighting scheme")
+            st.markdown(
+                "Use the sliders to decide which metrics matter most. "
+                "Higher weight means more influence on the final score."
+            )
 
-      <h3>Aggregation method</h3>
-      <p><b>Weighted sum</b><br/>
-      Combines all metrics using your chosen weights.</p>
+            st.markdown("---")
 
-      <p><b>Borda count</b><br/>
-      Ranks nodes per metric and combines the rankings.</p>
-    </div>
-    """
+            st.markdown("### Aggregation method")
 
-    st.markdown(
-        """
-        <style>
-          .guide-wrap {
-            display: flex;
-            gap: 2rem;
-            align-items: flex-start;
-            width: 100%;
-          }
-          .guide-left {
-            flex: 2;
-            min-width: 520px;
-          }
-          .guide-right {
-            flex: 1;
-            min-width: 320px;
-            padding: 1rem 1.2rem;
-            border: 1px solid rgba(255,255,255,0.12);
-            border-radius: 12px;
-            background: rgba(255,255,255,0.03);
-          }
-          .guide-right hr {
-            border: none;
-            border-top: 1px solid rgba(255,255,255,0.12);
-            margin: 1rem 0;
-          }
-          @media (max-width: 1100px) {
-            .guide-wrap { flex-direction: column; }
-            .guide-left, .guide-right { min-width: 0; }
-          }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+            st.markdown("**Weighted sum**")
+            st.markdown("Combines all metrics using your chosen weights.")
 
-    st.markdown(
-        f"""
-        <div class="guide-wrap">
-          {left_html}
-          {right_html}
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+            st.markdown("**Borda count**")
+            st.markdown("Ranks nodes per metric and combines the rankings.")
+
+    # ------------------------------------------------------------------
+    # Main title
+    # ------------------------------------------------------------------
+    st.title("Centrality Analysis")
 
     # --- Main page title ---
     st.title("Centrality Analysis")
