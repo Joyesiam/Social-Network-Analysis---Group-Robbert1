@@ -17,7 +17,6 @@ def page() -> None:
     st.set_page_config(page_title="Centrality Analysis", layout="wide")
 
     st.markdown("""
-        ---
         ## Centrality Analysis – Quick User Guide
 
         ### Centrality metrics (what do they mean?)
@@ -62,6 +61,8 @@ def page() -> None:
         
         **Borda count**  
         Ranks nodes per metric and combines the rankings.
+
+        ---
     """)
 
 
