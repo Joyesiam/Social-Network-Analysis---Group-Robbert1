@@ -50,8 +50,6 @@ def page() -> None:
         How much important attention flows to you?  
         High score = prestige or authority in the network.
         
-        ---
-        
         """)
     with col_right:
         st.markdown("""
@@ -73,7 +71,9 @@ def page() -> None:
         """)
 
 
-    
+    st.markdown("""
+    ---
+    """)
     st.title("Centrality Analysis")
     init_state()
     G = get_state("graph")
