@@ -66,7 +66,6 @@ def page() -> None:
         
         **Weighted sum**  
         Combines all metrics using your chosen weights.
-        
         **Borda count**  
         Ranks nodes per metric and combines the rankings.
 
