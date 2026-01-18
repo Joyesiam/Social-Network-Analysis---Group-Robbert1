@@ -26,7 +26,6 @@ def page() -> None:
 
     st.markdown("""
         ---
-        
         ## Quick User Guide
 
         ### Centrality metrics (what do they mean?)
