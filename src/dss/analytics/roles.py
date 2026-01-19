@@ -14,6 +14,9 @@ import pandas as pd
 import networkx as nx
 from sklearn.metrics import pairwise_distances
 from sklearn.cluster import SpectralClustering, AgglomerativeClustering
+import time
+from graphrole import RecursiveFeatureExtractor, RoleExtractor
+
 
 from ..types import RoleResult
 from .centrality import compute_centralities
@@ -169,7 +172,7 @@ def _cluster_similarity_matrix(
     return labels.tolist()
 
 
-def compute_roles(
+def compute_cooperbarahona(
     G: nx.Graph,
     signature: str = "k-hop",
     k: int = 3,
@@ -224,9 +227,215 @@ def compute_roles(
     df["role"] = [labels[node] for node in nodes]
     summary = df.groupby("role").mean()
     summary["size"] = df.groupby("role").size()
+    print(labels)
+    print(summary)
     # Create RoleResult
     return RoleResult(similarity_matrix=similarity, labels=labels, summary=summary)
 
+def createadjmatrix(Ni,Nj,R):
+    m = len(Ni)
+    n = len(Nj)
+    tempm1 = np.zeros((m,n))
+    tempm2 = np.zeros((m,m))
+    tempm3 = np.zeros((n,n))
+
+    for i in range(len(Ni)):
+        for j in range(len(Nj)):
+            tempm1[i,j] = R[Ni[i],Nj[j]]
+
+    tempfinalm = np.concatenate((np.concatenate((tempm2,tempm1.T)),np.concatenate((tempm1,tempm3))),axis=1)
+    return tempfinalm
+
+def rolesim_calc(G, beta=0.10,maxiter=100):
+    start = time.perf_counter()
+    n = G.number_of_nodes()
+    convtol = beta/100
+
+    #Initialize scores
+    scores0 = np.zeros((n,n))
+    for i in range(n):
+        for j in range(n):
+            if G.degree[i]==G.degree[j]:
+                scores0[i,j] = 1
+                
+    scores = {}
+    scores[0] = scores0
+    for k in range(1,maxiter):
+        stemp = np.zeros((n,n))
+        sprev = scores[k-1]
+        for i in range(n):
+            for j in range(n):
+                Ni = list(G[i])
+                Nj = list(G[j])
+                Nil = len(Ni)
+                Njl = len(Nj)
+                Ml = np.min([Nil,Njl])
+                adjmtemp = createadjmatrix(Ni,Nj,sprev)
+                Gtemp = nx.from_numpy_array(adjmtemp)
+                M = list(nx.max_weight_matching(Gtemp))
+                '''
+                if Ml != len(M):
+                    print(i,Ni,Nil)
+                    print(j,Nj,Njl)
+                    print(Ml,len(M))
+                    print(M)    
+                '''    
+                temp = 0
+                for edge in M:
+                    temp += adjmtemp[edge[0],edge[1]]
+                stemp[i,j] = (1-beta)*(temp/(Nil+Njl-Ml))+beta
+        scores[k] = stemp
+        tempm = np.abs(stemp-sprev)
+
+        if all(x < convtol for x in tempm.flatten()):
+            print(k,'Stop, convergence reached')
+            break
+        if k % 5 == 0:
+            print(f'{k} iterations computed, not yet converged')
+            end = time.perf_counter()
+            print(k,end-start)
+            print(np.max(tempm.flatten()))
+        
+    return scores[(len(scores)-1)]
+
+def rolesim_star_calc(G, beta=0.10,lambd=0.70,maxiter=100):
+    start = time.perf_counter()
+    n = G.number_of_nodes()
+    convtol = beta/100
+
+    #Initialize scores
+    scores0 = np.ones((n,n))
+    for i in range(n):
+        for j in range(n):
+            if G.degree[i]==G.degree[j]:
+                scores0[i,j] = 1
+                
+    scores = {}
+    scores[0] = scores0
+    for k in range(1,maxiter+1):
+        stemp = np.zeros((n,n))
+        sprev = scores[k-1]
+        for i in range(n):
+            for j in range(n):
+                Ni = list(G[i])
+                Nj = list(G[j])
+                Nil = len(Ni)
+                Njl = len(Nj)
+                Ml = np.min([Nil,Njl])
+                adjmtemp = createadjmatrix(Ni,Nj,sprev)
+                Gtemp = nx.from_numpy_array(adjmtemp)
+                M = list(nx.max_weight_matching(Gtemp))
+                '''
+                if Ml != len(M):
+                    print(i,Ni,Nil)
+                    print(j,Nj,Njl)
+                    print(Ml,len(M))
+                    print(M)    
+                '''    
+                temp = 0
+                #For all edges inside the matching
+                for edge in M:
+                    temp += adjmtemp[edge[0],edge[1]]
+                    
+                #For all edges (pairs) not in the matching
+                temp2 = 0
+
+                M2 = [x[::-1] for x in M]
+                Mtot = M + M2
+                for edge in Gtemp.edges()-Mtot:
+                    if (Nil*Njl-Ml)==0:
+                        print(i,j,Ni,Nj)
+                        print(Gtemp.edges())
+                        print(M)
+                        print(Gtemp.edges()-M)
+                        print(edge)
+                        
+                    temp2 += adjmtemp[edge[0],edge[1]]
+
+                '''
+                if (Nil*Njl-Ml)==0:
+                    print(Nil,Njl,Ml)
+                    print((Nil*Njl-Ml))
+                    print(temp2)
+                '''
+                if (Nil*Njl-Ml)==0:
+                    stemp[i,j] = (1-beta)*(lambd*(temp/(Nil+Njl-Ml))+(1-lambd)*(1))+beta
+                #elif i==j:
+                #    stemp[i,j] = (1-beta)*(lambd*(temp/(Nil+Njl-Ml))+(1-lambd)*(1))+beta
+                else:
+                    stemp[i,j] = (1-beta)*(lambd*(temp/(Nil+Njl-Ml))+(1-lambd)*(temp2/(Nil*Njl-Ml)))+beta
+        scores[k] = stemp
+        tempm = np.abs(stemp-sprev)
+
+        if all(x < convtol for x in tempm.flatten()):
+            print(k,'Stop, convergence reached')
+            break
+        if k % 5 == 0:
+            print(f'{k} iterations computed, not yet converged')
+            end = time.perf_counter()
+            print(k,end-start)
+            print(np.max(tempm.flatten()))
+        
+    return scores[(len(scores)-1)]
+
+def compute_rolesim(G,beta,maxiter,clustering_method,n_roles,centrality_table):
+    nodes = list(G.nodes())
+    similarity = rolesim_calc(G,beta,maxiter)
+    labels_list = _cluster_similarity_matrix(similarity, n_roles, method=clustering_method)
+    # Build labels dictionary keyed by node
+    labels = {node: labels_list[i] for i, node in enumerate(nodes)}
+    # Compute summary statistics per role
+    if centrality_table is None:
+        centrality_table = compute_centralities(G)
+    df = centrality_table.copy()
+    df["role"] = [labels[node] for node in nodes]
+    summary = df.groupby("role").mean()
+    summary["size"] = df.groupby("role").size()
+    # Create RoleResult
+    return RoleResult(similarity_matrix=similarity, labels=labels, summary=summary)
+
+def compute_rolesim_star(G,beta,lambd,maxiter,clustering_method,n_roles,centrality_table):
+    nodes = list(G.nodes())
+    similarity = rolesim_star_calc(G,beta,lambd,maxiter)
+    labels_list = _cluster_similarity_matrix(similarity, n_roles, method=clustering_method)
+    # Build labels dictionary keyed by node
+    labels = {node: labels_list[i] for i, node in enumerate(nodes)}
+    # Compute summary statistics per role
+    if centrality_table is None:
+        centrality_table = compute_centralities(G)
+    df = centrality_table.copy()
+    df["role"] = [labels[node] for node in nodes]
+    summary = df.groupby("role").mean()
+    summary["size"] = df.groupby("role").size()
+    # Create RoleResult
+    return RoleResult(similarity_matrix=similarity, labels=labels, summary=summary)
+
+def compute_rolx(G,n_roles,centrality_table):
+    #'''
+    feature_extractor = RecursiveFeatureExtractor(G)
+    features = feature_extractor.extract_features()
+    role_extractor = RoleExtractor(n_roles=None)
+    role_extractor.extract_role_factors(features)
+    print(role_extractor.roles)
+    #'''
+    return 1
+
+def compute_roles(G,method,centralities,info):
+    if method == "Cooper and Barahona":
+        return compute_cooperbarahona(G,info["signature"],info["k"],info["t"],
+                                      info["similarity_metric"],info["clustering_method"],
+                                      info["n_roles"],centralities)
+    elif method == "RoleSim":
+        return compute_rolesim(G,info["beta"],info["maxiter"],info["clustering_method"],
+                               info["n_roles"],centralities)
+    elif method == "RoleSim*":
+        return compute_rolesim_star(G,info["beta"],info["lambd"],info["maxiter"],info["clustering_method"],
+                               info["n_roles"],centralities)
+    elif method == "RolX":
+        return compute_rolx(G,info["n_roles"],centralities)
+    else:
+        return KeyError('Not possible')
+ 
 
 if __name__ == "__main__":
     import networkx as nx
