@@ -12,22 +12,36 @@ import streamlit as st
 
 def init_state() -> None:
     """Initialise session state variables if they are missing."""
+    # defaults: Dict[str, Any] = {
+    #     "graph": None,
+    #     "adjacency": None,
+    #     "centrality_table": None,
+    #     "centrality_result": None,
+    #     "role_result": None,
+    #     "community_results": {},
+    #     "kemeny_result": None,
+    #     "arrest_result": None,
+    #     # Auth
+    #     "auth_ok": False,
+    #     "auth_user": None,
+    # }
     defaults: Dict[str, Any] = {
+        # Core data
         "graph": None,
         "adjacency": None,
+
+        # Remember the uploaded .mtx so we can restore without asking the user again
+        "mtx_filename": None,   # type: Optional[str]
+        "mtx_bytes": None,      # type: Optional[bytes]
+
+        # Analysis caches
         "centrality_table": None,
         "centrality_result": None,
         "role_result": None,
-        "community_results": {},
+        "community_results": {},  # keyed by method
         "kemeny_result": None,
         "arrest_result": None,
-    
-        # Upload persistence within the session
-        "mtx_name": None,
-        "mtx_bytes": None,
-        "mtx_sha256": None,
-        "adjacency_bytes": None,
-    
+
         # Auth
         "auth_ok": False,
         "auth_user": None,
