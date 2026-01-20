@@ -439,7 +439,7 @@ def page() -> None:
     # Always include explicitly selected nodes in highlight list
     highlight_nodes += [n for n in selected_nodes if n not in highlight_nodes]
     st.subheader("Network with node size by aggregated centrality", help="""
-    This network visualization shows the graph with **node size scaled by the aggregated centrality score**.
+    This network visualization shows the graph with node size scaled by the aggregated centrality score.
 
     Each node represents an entity in the network. Larger nodes have a higher combined centrality score, meaning they are more important or influential according to the selected aggregation method and weights. Smaller nodes are less central under the same settings.
     
