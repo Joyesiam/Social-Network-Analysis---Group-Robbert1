@@ -16,6 +16,12 @@ def page() -> None:
     st.set_page_config(page_title="Role Analysis", layout="wide")
     st.title("Role Identification via Similarity Clustering")
 
+    init_state()
+    G = get_state("graph")
+    if G is None:
+        st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
+        return
+
     with st.expander("Quick User Guide", expanded=False):
         st.markdown(
             """
@@ -23,11 +29,6 @@ def page() -> None:
             """,
         )
     
-    init_state()
-    G = get_state("graph")
-    if G is None:
-        st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
-        return
     # Sidebar parameters
     st.sidebar.header("Role identification methods")
     method = st.sidebar.selectbox("Method", ["Cooper and Barahona", "RoleSim", "RoleSim*", "RolX"], index=0)
