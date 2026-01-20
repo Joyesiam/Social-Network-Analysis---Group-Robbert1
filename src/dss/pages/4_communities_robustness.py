@@ -14,11 +14,11 @@ from dss.analytics.roles import compute_roles
 def page() -> None:
     st.set_page_config(page_title="Community Clustering", layout="wide")
     st.title("Community Clustering")
-       st.markdown("""
-        ## Community Clustering – Quick User Guide
+    st.markdown("""
+    ## Community Clustering – Quick User Guide
 
-        ### Clustering Guide
-        """)
+    ### Clustering Guide
+    """)
         
     col_left, col_right = st.columns([3, 2])
 
