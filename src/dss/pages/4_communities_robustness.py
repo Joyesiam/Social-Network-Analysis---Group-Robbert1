@@ -117,7 +117,9 @@ def page() -> None:
     selected_nodes = st.sidebar.multiselect(
         "Nodes", options=list(G.nodes()), default=[], help = "Select nodes based on number in the graph."
     )
-    highlight_nodes = selected_nodes
+    # highlight_nodes = selected_nodes
+    highlight_nodes_selected = list(selected_nodes)
+    
     
     # Display summary
     col_stats, col_plot = st.columns(2)
@@ -133,7 +135,7 @@ def page() -> None:
         display_network(
             G,
             node_color=community_colors,
-            highlight=highlight_nodes,
+            highlight_selected=highlight_nodes_selected,
             title=f"Communities ({method})",
             show_labels=True,
         )
