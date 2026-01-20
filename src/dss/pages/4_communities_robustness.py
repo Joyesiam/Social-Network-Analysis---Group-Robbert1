@@ -12,7 +12,7 @@ from dss.analytics.roles import compute_roles
 
 
 def page() -> None:
-    st.set_page_config(page_title="Communities Clustering", layout="wide")
+    st.set_page_config(page_title="Communities Detection & Robustness", layout="wide")
     st.title("Community Clustering")
 
     init_state()
