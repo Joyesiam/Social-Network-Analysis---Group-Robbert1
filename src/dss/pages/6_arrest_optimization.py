@@ -98,6 +98,13 @@ def page() -> None:
     if G is None:
         st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
         return
+
+    with st.expander("Quick User Guide", expanded=False):
+        st.markdown(
+            """
+         
+            """,
+        )
     
     if get_state("centrality_result") is None:
         centrality_result = compute_centrality_result(G)
