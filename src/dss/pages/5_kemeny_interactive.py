@@ -161,11 +161,18 @@ def page() -> None:
     st.set_page_config(page_title="Kemeny Analysis", layout="wide")
     st.title("Kemeny Constant and Connectivity Analysis")
 
+
+    init_state()
+    G = get_state("graph")
+    if G is None:
+        st.info("No graph loaded. Please upload a `.mtx` file on the Upload page.")
+        return
+
     with st.expander("Quick User Guide", expanded=False):
         col_left, col_right = st.columns([2, 3])
 
         with col_left:
-                st.markdown("### How does this page work?")
+                §st.markdown("### How does this page work?")
                 st.markdown(
                     """
                     This page analyzes the Kemeny constant of the graph, which measures the expected mixing time of a random walk.
@@ -187,14 +194,6 @@ def page() -> None:
                     show_labels=True,
                     removed_edges=None,
                 )
-
-    init_state()
-    G = get_state("graph")
-    if G is None:
-        st.info("No graph loaded. Please upload a `.mtx` file on the Upload page.")
-        return
-
-    
 
     st.subheader("Remove edges and observe effect on Kemeny")
     recompute_on_largest = st.checkbox("Recompute on largest component if disconnected", value=True)
