@@ -82,9 +82,9 @@ def page() -> None:
     # Sidebar: choose method and parameters
     st.sidebar.header("Community detection parameters")
     # method = st.sidebar.selectbox("Method", ["louvain", "girvan_newman", "spectral"], index=0)
-    method = st.sidebar.selectbox("Method", ["spectral", "girvan_newman", "louvain"], index=0)
+    method = st.sidebar.selectbox("Method", ["spectral", "girvan_newman", "louvain"], index=0, help = "Select method of computing community clusters.")
     if method in {"girvan_newman", "spectral"}:
-        k = st.sidebar.slider("Number of clusters (k)", 2, max(2, int(G.number_of_nodes() / 2)), 2)
+        k = st.sidebar.slider("Number of clusters (k)", 2, max(2, int(G.number_of_nodes() / 2)), 2, help = "Select the number of communities you want to distinct.")
     else:
         k = None
     # Compute communities
@@ -112,17 +112,17 @@ def page() -> None:
     st.subheader("Network coloured by communities")
         
     # Robustness analysis
-    runs = st.sidebar.slider("Number of perturbation runs", 10, 100, 50)
-    p = st.sidebar.slider("Fraction of edges to remove", 0.01, 0.30, 0.05, 0.01)
-    if st.sidebar.button("Run robustness test"):
+    runs = st.sidebar.slider("Number of perturbation runs", 10, 100, 50, help = "Select amount of perturbation runs, more runs = more certainty.")
+    p = st.sidebar.slider("Fraction of edges to remove", 0.01, 0.30, 0.05, 0.01, help = "Select fraction of edged to be removes, more removal = more drastic changes to network.")
+    if st.sidebar.button("Run robustness test", help = "(re)run robustness test and update changes."):
         robustness_result = perturbation_test(G, method=method, p=p, runs=runs, k=(k or 2))
         set_state("robustness_result", robustness_result)
     robustness_result = get_state("robustness_result")
     
     # Allow user to select nodes for inspection
-    st.sidebar.subheader("Select nodes to inspect")
+    st.sidebar.subheader("Select nodes to inspect", )
     selected_nodes = st.sidebar.multiselect(
-        "Nodes", options=list(G.nodes()), default=[]
+        "Nodes", options=list(G.nodes()), default=[], help = "Select nodes based on number in the graph."
     )
     highlight_nodes = selected_nodes
     display_network(
