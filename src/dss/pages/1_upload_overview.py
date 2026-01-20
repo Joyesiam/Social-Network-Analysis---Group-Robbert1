@@ -31,7 +31,21 @@ def page() -> None:
     # Initialise session state
     init_state()
     # File uploader
-    uploaded_file = st.file_uploader("Upload a Matrix Market (.mtx) file", type=["mtx"], help="TESTTETSTSTSTSTS")
+    # uploaded_file = st.file_uploader("Upload a Matrix Market (.mtx) file", type=["mtx"])
+    uploaded_file = st.file_uploader(
+        "Upload a Matrix Market (.mtx) file",
+        type=["mtx"],
+        help="""
+    What is a .mtx file?
+    Upload a Matrix Market (.mtx) file representing a network adjacency matrix.
+    
+    Rows and columns correspond to nodes; non-zero entries indicate connections.
+    
+    After upload, the graph will be loaded and all analysis pages become available.
+    """
+    )
+
+
     if uploaded_file is not None:
         try:
             # Load adjacency matrix
