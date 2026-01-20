@@ -13,7 +13,7 @@ from dss.analytics.roles import compute_roles
 
 def page() -> None:
     st.set_page_config(page_title="Communities Detection & Robustness", layout="wide")
-    st.title("Community Clustering")
+    st.title("Community Detection & Robustness")
 
     init_state()
     G = get_state("graph")
