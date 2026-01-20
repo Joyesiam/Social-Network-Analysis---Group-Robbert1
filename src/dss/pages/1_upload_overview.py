@@ -57,7 +57,6 @@ def page() -> None:
                 Once a valid `.mtx` file is provided, you can immediately continue with the next steps.
                 
                 ---
-                
                 ### Tip
                 
                 If you are unsure about the file format or interpretation of results, consult the **User Manual** in the navigation menu for detailed explanations and examples.
