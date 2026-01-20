@@ -124,6 +124,19 @@ def page() -> None:
         st.subheader("Community summary")
         st.write(f"Modularity Q: {comm_result.modularity:.3f}")
         st.dataframe(comm_result.summary)
+        from collections import defaultdict
+        community_to_nodes = defaultdict(list)
+        for node, comm in comm_result.labels.items():
+            community_to_nodes[comm].append(node)
+        max_size = max(len(nodes) for nodes in community_to_nodes.values())
+        table_data = {
+            f"Community {c}": nodes + [None] * (max_size - len(nodes))
+            for c, nodes in sorted(community_to_nodes.items())
+        }
+        df_communities = pd.DataFrame(table_data)
+        st.subheader("Community membership table")
+        st.dataframe(df_communities, use_container_width=True)
+        
         
     with col_plot:
         # Network plot coloured by communities with node selection
