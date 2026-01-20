@@ -3,6 +3,7 @@
 import streamlit as st
 import pandas as pd
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
+from collections import defaultdict
 
 from dss.ui.state import init_state, get_state, set_state
 from dss.analytics.communities import compute_communities
@@ -124,18 +125,26 @@ def page() -> None:
         st.subheader("Community summary")
         st.write(f"Modularity Q: {comm_result.modularity:.3f}")
         st.dataframe(comm_result.summary)
-        from collections import defaultdict
+        # Build community → nodes mapping
         community_to_nodes = defaultdict(list)
         for node, comm in comm_result.labels.items():
             community_to_nodes[comm].append(node)
-        max_size = max(len(nodes) for nodes in community_to_nodes.values())
+        # Ensure consistent ordering
+        for nodes in community_to_nodes.values():
+            nodes.sort()
+        # Build rectangular table
+        max_len = max(len(nodes) for nodes in community_to_nodes.values())
         table_data = {
-            f"Community {c}": nodes + [None] * (max_size - len(nodes))
-            for c, nodes in sorted(community_to_nodes.items())
+            f"Community {comm}": nodes + [""] * (max_len - len(nodes))
+            for comm, nodes in sorted(community_to_nodes.items())
         }
         df_communities = pd.DataFrame(table_data)
-        st.subheader("Community membership table")
-        st.dataframe(df_communities, use_container_width=True)
+        st.subheader("Community membership")
+        st.dataframe(
+        df_communities,
+        use_container_width=True,
+        height=300   # makes it scrollable
+        )
         
         
     with col_plot:
