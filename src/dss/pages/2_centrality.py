@@ -24,62 +24,122 @@ def page() -> None:
         st.info("No graph loaded.  Please upload a `.mtx` file on the Upload page.")
         return
 
-    st.markdown("""
-        ---
-        ## Quick User Guide
+    # st.markdown("""
+    #     ---
+    #     ## Quick User Guide
 
-        ### Centrality metrics (what do they mean?)
-        """)
+    #     ### Centrality metrics (what do they mean?)
+    #     """)
         
-    col_left, col_right = st.columns([3, 2])
+    # col_left, col_right = st.columns([3, 2])
 
-    with col_left:
-        st.markdown("""
-        **Degree**  
-        How many direct connections does a node have?  
-        High score = very connected or popular.
+    # with col_left:
+    #     st.markdown("""
+    #     **Degree**  
+    #     How many direct connections does a node have?  
+    #     High score = very connected or popular.
         
-        **Eigenvector**  
-        Are you connected to other important nodes?  
-        High score = influence through influential connections.
+    #     **Eigenvector**  
+    #     Are you connected to other important nodes?  
+    #     High score = influence through influential connections.
         
-        **Katz**  
-        How far does your influence reach, directly and indirectly?  
-        High score = strong reach through the network.
+    #     **Katz**  
+    #     How far does your influence reach, directly and indirectly?  
+    #     High score = strong reach through the network.
         
-        **Betweenness**  
-        How often do others need you to connect?  
-        High score = you act as a bridge between groups.
+    #     **Betweenness**  
+    #     How often do others need you to connect?  
+    #     High score = you act as a bridge between groups.
         
-        **Closeness**  
-        How quickly can you reach everyone else?  
-        High score = centrally located in terms of distance.
+    #     **Closeness**  
+    #     How quickly can you reach everyone else?  
+    #     High score = centrally located in terms of distance.
         
-        **PageRank**  
-        How much important attention flows to you?  
-        High score = prestige or authority in the network.
-        """)
-    with col_right:
-        st.markdown("""
+    #     **PageRank**  
+    #     How much important attention flows to you?  
+    #     High score = prestige or authority in the network.
+    #     """)
+    # with col_right:
+    #     st.markdown("""
         
-        ### Weighting scheme
+    #     ### Weighting scheme
         
-        Use the sliders to decide **which metrics matter most**.  
-        Higher weight means more influence on the final score.
+    #     Use the sliders to decide **which metrics matter most**.  
+    #     Higher weight means more influence on the final score.
         
-        ### Aggregation method
+    #     ### Aggregation method
         
-        **Weighted sum**  
-        Combines all metrics using your chosen weights.
+    #     **Weighted sum**  
+    #     Combines all metrics using your chosen weights.
         
-        **Borda count**  
-        Ranks nodes per metric and combines the rankings.
-        """)
+    #     **Borda count**  
+    #     Ranks nodes per metric and combines the rankings.
+    #     """)
 
 
-    st.markdown("""
-    ---
-    """)
+    # st.markdown("""
+    # ---
+    # """)
+        # --- Quick User Guide (collapsible, starts closed) ---
+    st.markdown("---")
+
+    with st.expander("Quick User Guide", expanded=False):
+        st.markdown(
+            """
+            **Centrality metrics (what do they mean?)**
+            """,
+        )
+
+        col_left, col_right = st.columns([3, 2], gap="large")
+
+        with col_left:
+            st.markdown(
+                """
+                **Degree**  
+                How many direct connections does a node have?  
+                High score = very connected or popular.
+
+                **Eigenvector**  
+                Are you connected to other important nodes?  
+                High score = influence through influential connections.
+
+                **Katz**  
+                How far does your influence reach, directly and indirectly?  
+                High score = strong reach through the network.
+
+                **Betweenness**  
+                How often do others need you to connect?  
+                High score = you act as a bridge between groups.
+
+                **Closeness**  
+                How quickly can you reach everyone else?  
+                High score = centrally located in terms of distance.
+
+                **PageRank**  
+                How much important attention flows to you?  
+                High score = prestige or authority in the network.
+                """,
+            )
+
+        with col_right:
+            st.markdown(
+                """
+                **Weighting scheme**  
+                Use the sliders to decide which metrics matter most.  
+                Higher weight means more influence on the final score.
+
+                **Aggregation method**  
+
+                **Weighted sum**  
+                Combines all metrics using your chosen weights.
+
+                **Borda count**  
+                Ranks nodes per metric and combines the rankings.
+                """,
+            )
+
+    st.markdown("---")
+
     # Compute or retrieve centrality result
     if get_state("centrality_result") is None:
         result = compute_centrality_result(G)
