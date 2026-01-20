@@ -455,16 +455,15 @@ def page() -> None:
     color_map = combined.to_dict()
     
     col_left, col_right = st.columns([3, 2], gap="large")
-        with col_left:
-
-            display_network(
-                G,
-                node_size=size_map,
-                node_color=color_map,
-                highlight=highlight_nodes,
-                title="Centrality-scaled network",
-                show_labels=True,
-            )
+    with col_left:
+        display_network(
+            G,
+            node_size=size_map,
+            node_color=color_map,
+            highlight=highlight_nodes,
+            title="Centrality-scaled network",
+            show_labels=True,
+        )
     # Show information for selected nodes
     if selected_nodes:
         st.subheader("Selected node details", help="""
