@@ -356,15 +356,15 @@ Off:
     # Display centrality table
     st.dataframe(
         df.assign(combined=combined).sort_values("combined", ascending=False),
-        help="""
-This table shows the centrality scores per node.
+#         help="""
+# This table shows the centrality scores per node.
 
-Each column is one centrality metric.
-The 'combined' column is the final aggregated score based on the settings in the sidebar.
+# Each column is one centrality metric.
+# The 'combined' column is the final aggregated score based on the settings in the sidebar.
 
-Tip:
-Sort by 'combined' to see which nodes are most central according to your chosen method.
-""",
+# Tip:
+# Sort by 'combined' to see which nodes are most central according to your chosen method.
+# """,
     )
     # Download as CSV
     csv_data = df.assign(combined=combined).to_csv().encode("utf-8")
@@ -457,12 +457,12 @@ Selected nodes will:
         info_df["combined"] = combined.loc[selected_nodes]
         st.dataframe(
             info_df,
-            help="""
-This section shows the exact metric values for the nodes you selected in the sidebar.
+#             help="""
+# This section shows the exact metric values for the nodes you selected in the sidebar.
 
-Use it to compare nodes side-by-side and understand *why* a node scores high or low
-under different metrics and aggregation settings.
-""",
+# Use it to compare nodes side-by-side and understand *why* a node scores high or low
+# under different metrics and aggregation settings.
+# """,
         )
 
     
