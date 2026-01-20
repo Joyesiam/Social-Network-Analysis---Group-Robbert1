@@ -101,19 +101,18 @@ def page() -> None:
 
     with st.expander("Quick User Guide", expanded=False):
         st.markdown(
-            """
-    
-        **Estimated number of effective arrests**   
-        The effective arrests are  the number of arrests possible that realistically can be carried out, considering the cross department edges.  
-        
-        **Visualisation**  
-        The network shows the result of the arrest optimisation. Nodes are colourd by deparment assignment, and the risky edges are highligted in red.
-        This helps indentify critcal members and risky edges.  
+        """
+            **Estimated number of effective arrests**   
+            The effective arrests are  the number of arrests possible that realistically can be carried out, considering the cross department edges.  
+            
+            **Visualisation**  
+            The network shows the result of the arrest optimisation. Nodes are colourd by deparment assignment, and the risky edges are highligted in red.
+            This helps indentify critcal members and risky edges.  
         """
         )
             
-            st.markdown("### Edges across departments")
-            st.markdown(
+        st.markdown("### Edges across departments")
+        st.markdown(
         """
         These edges are considered risky because they connect members from different departments.
 
