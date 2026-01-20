@@ -15,6 +15,14 @@ from dss.analytics.communities import compute_communities
 def page() -> None:
     st.set_page_config(page_title="Role Analysis", layout="wide")
     st.title("Role Identification via Similarity Clustering")
+
+    with st.expander("Quick User Guide", expanded=False):
+        st.markdown(
+            """
+         
+            """,
+        )
+    
     init_state()
     G = get_state("graph")
     if G is None:
