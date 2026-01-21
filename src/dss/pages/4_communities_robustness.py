@@ -118,10 +118,34 @@ def page() -> None:
     # Robustness analysis
     runs = st.sidebar.slider("Number of perturbation runs", 10, 100, 50, help = "Select amount of perturbation runs. more runs = more certainty.")
     p = st.sidebar.slider("Fraction of edges to remove", 0.01, 0.30, 0.05, 0.01, help = "Select fraction of edged to be removes, more removal = more drastic changes to network.")
-    if st.sidebar.button("Run robustness test", help = "(re)run robustness test and update changes."):
-        robustness_result = perturbation_test(G, method=method, p=p, runs=runs, k=(k or 2))
-        set_state("robustness_result", robustness_result)
+    
     robustness_result = get_state("robustness_result")
+    # Auto-run once on page load
+    if robustness_result is None:
+        robustness_result = perturbation_test(
+            G,
+            method=method,
+            p=p,
+            runs=runs,
+            k=(k or 2),
+        )
+        set_state("robustness_result", robustness_result)
+    # Optional manual rerun
+    if st.sidebar.button("Run robustness test"):
+        robustness_result = perturbation_test(
+            G,
+            method=method,
+            p=p,
+            runs=runs,
+            k=(k or 2),
+        )
+        set_state("robustness_result", robustness_result)
+    
+    
+   # if st.sidebar.button("Run robustness test", help = "(re)run robustness test and update changes."):
+   #     robustness_result = perturbation_test(G, method=method, p=p, runs=runs, k=(k or 2))
+   #     set_state("robustness_result", robustness_result)
+   # robustness_result = get_state("robustness_result")
 
     # Allow user to select nodes for inspection
     # st.sidebar.subheader("Select nodes to inspect", )
