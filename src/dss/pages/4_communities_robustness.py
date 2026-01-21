@@ -168,21 +168,17 @@ Different colors represent different communities.
                     )   
         
         
-        team_colors = { 0: "#440154", 1: "#FDE725" }
-        team_patches = [mpatches.Patch(color=color, label=f"Dept. {team + 1}") for team, color in team_colors.items()]
-        risky_line = mlines.Line2D([], [], color='red', linestyle='dashed', label='Risky edge')
-        legend_items = team_patches + [risky_line]
-        
+        comm_colors = { 0: "#440154", 1: "#FDE725" }
+        legend_items = comm_colors
 
         display_network(
                 G,
-                node_color=dept_colors,
-                title="Department assignment",
-                #add risky edges to plot 
-                removed_edges=arrest_result.risk_edges,
-                show_labels=True,
+                node_color=community_colors,
+                highlight_selected=highlight_nodes_selected,
+                title=f"Communities ({method})",
                 # highlight=selected_nodes
                 highlight_selected=highlight_nodes_selected,
+                show_labels=True,
                 legend_items = legend_items,
             )
         
