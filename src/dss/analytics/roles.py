@@ -17,9 +17,12 @@ from sklearn.cluster import SpectralClustering, AgglomerativeClustering
 import time
 
 
+
 from ..types import RoleResult
 from .centrality import compute_centralities
 from ..logging_config import get_logger
+
+from graphrole.roles.extract import RoleExtractor
 
 logger = get_logger(__name__)
 
@@ -219,6 +222,7 @@ def compute_cooperbarahona(
     labels_list = _cluster_similarity_matrix(similarity, n_clusters, method=clustering_method)
     # Build labels dictionary keyed by node
     labels = {node: labels_list[i] for i, node in enumerate(nodes)}
+    print('labels:', labels)
     # Compute summary statistics per role
     if centrality_table is None:
         centrality_table = compute_centralities(G)
@@ -226,8 +230,6 @@ def compute_cooperbarahona(
     df["role"] = [labels[node] for node in nodes]
     summary = df.groupby("role").mean()
     summary["size"] = df.groupby("role").size()
-    print(labels)
-    print(summary)
     # Create RoleResult
     return RoleResult(similarity_matrix=similarity, labels=labels, summary=summary)
 
@@ -409,8 +411,38 @@ def compute_rolesim_star(G,beta,lambd,maxiter,clustering_method,n_roles,centrali
     # Create RoleResult
     return RoleResult(similarity_matrix=similarity, labels=labels, summary=summary)
 
+def transform_roles(roles,n_roles):
+    if n_roles == None:
+        n_roles = 0
+        for i in range(100):
+            temp = False
+            for key in roles.keys():
+                if roles[key] == f'role_{i}':
+                    if i+1 > n_roles:
+                        n_roles = i+1
+                        temp = True
+
+    newroles = {}
+    for key in roles.keys():
+        for i in range(n_roles):
+            if roles[key] == f'role_{i}':
+                newroles[key] = i
+    return newroles
+
 def compute_rolx(G,n_roles,centrality_table):
-    return 1
+    nodes = list(G.nodes())
+    role_extractor = RoleExtractor(n_roles=n_roles)
+    role_extractor.extract_role_factors(centrality_table.drop('katz',axis=1))
+    labels = transform_roles(role_extractor.roles,n_roles)
+    # Compute summary statistics per role
+    if centrality_table is None:
+        centrality_table = compute_centralities(G)
+    df = centrality_table.copy()
+    df["role"] = [labels[node] for node in nodes]
+    summary = df.groupby("role").mean()
+    summary["size"] = df.groupby("role").size()
+    # Create RoleResult
+    return RoleResult(similarity_matrix=None, labels=labels, summary=summary)
 
 def compute_roles(G,method,centralities,info):
     if method == "Cooper and Barahona":
