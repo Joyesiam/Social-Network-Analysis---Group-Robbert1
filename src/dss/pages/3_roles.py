@@ -203,7 +203,13 @@ def page() -> None:
             # Node selection for highlight and inspection
             st.sidebar.subheader("Select nodes to inspect")
             selected_nodes = st.sidebar.multiselect(
-                "Nodes", options=list(G.nodes()), default=[]
+                options=list(G.nodes()), default=[], help="""
+Select one or more nodes to inspect in detail.
+
+Selected nodes will:
+- Always be highlighted in the network view
+- Appear in a detailed table at the bottom of this page
+"""
             )
             # Highlight nodes that are selected
             # highlight_nodes = selected_nodes
