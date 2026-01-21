@@ -482,7 +482,8 @@ def page() -> None:
         )
 
     # === FIRST MAIN SPLIT: left controls + constants | right reorder + plot + network ===
-    col_left, col_middle, col_right = st.columns([2, 2, 2])
+    col_left, col_right = st.columns([2, 3])
+
 
     with col_left:
         st.subheader("Remove edges and observe effect on Kemeny")
@@ -554,7 +555,11 @@ def page() -> None:
         )
         st.dataframe(order_df, use_container_width=True, hide_index=True)
 
-    with col_middle:
+    # with col_middle:
+        
+
+        
+    with col_right:
         if order:
             st.markdown("### Kemeny constant after each removal", help="""
                     The order of the removal of certain edges has an impact on the subsequent Kemeny values that the remaining edges contain. A certain edge can have a bigger impact on the information network if similar edges have already been removed. As such, the following graph shows the inpact of each edge removal per step.
@@ -569,7 +574,6 @@ def page() -> None:
             st.pyplot(fig)
 
         
-    with col_right:
         st.markdown("### Network view (after removing edges)")
         H = G.copy()
         for u, v in ordered_edges:
