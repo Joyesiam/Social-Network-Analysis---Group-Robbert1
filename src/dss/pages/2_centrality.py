@@ -595,34 +595,36 @@ def page() -> None:
         # Always include explicitly selected nodes in highlight list
         # highlight_nodes += [n for n in selected_nodes if n not in highlight_nodes]
         highlight_nodes_selected = list(selected_nodes)
-        st.subheader("Network with node size by aggregated centrality", help="""
-    This network visualization shows the graph with node size scaled by the aggregated centrality score.
+
+        with col_right:
+            st.subheader("Network with node size by aggregated centrality", help="""
+This network visualization shows the graph with node size scaled by the aggregated centrality score.
+
+Each node represents an entity in the network. Larger nodes have a higher combined centrality score, meaning they are more important or influential according to the selected aggregation method and weights. Smaller nodes are less central under the same settings.
+
+Node colors reflect relative centrality levels, helping you visually distinguish highly central nodes from more peripheral ones. Edges represent connections between nodes.
+
+Nodes outlined in red are highlighted based on your sidebar selections, such as the Top N most central nodes, the Bottom N least central nodes, or nodes you selected manually. Highlighted nodes always remain visible, even if multiple highlighting rules apply.
+
+Use this view to quickly identify key hubs, bridges, and structurally important nodes, and to understand how changes in weighting or aggregation affect the perceived importance of nodes in the network.
+        """
+            )
+            # Map node sizes and colours
+            size_map = combined.to_dict()
+            color_map = combined.to_dict()
     
-    Each node represents an entity in the network. Larger nodes have a higher combined centrality score, meaning they are more important or influential according to the selected aggregation method and weights. Smaller nodes are less central under the same settings.
-    
-    Node colors reflect relative centrality levels, helping you visually distinguish highly central nodes from more peripheral ones. Edges represent connections between nodes.
-    
-    Nodes outlined in red are highlighted based on your sidebar selections, such as the Top N most central nodes, the Bottom N least central nodes, or nodes you selected manually. Highlighted nodes always remain visible, even if multiple highlighting rules apply.
-    
-    Use this view to quickly identify key hubs, bridges, and structurally important nodes, and to understand how changes in weighting or aggregation affect the perceived importance of nodes in the network.
-    """
-        )
-        # Map node sizes and colours
-        size_map = combined.to_dict()
-        color_map = combined.to_dict()
-    with col_right:
-    
-    # col_left, col_right = st.columns([3, 2], gap="large")
-    # with col_left:
-        display_network(
-            G,
-            node_size=size_map,
-            node_color=color_map,
-            highlight_top=highlight_nodes,
-            highlight_selected=highlight_nodes_selected,
-            title="Centrality-scaled network",
-            show_labels=True,
-        )
+        
+        # col_left, col_right = st.columns([3, 2], gap="large")
+        # with col_left:
+            display_network(
+                G,
+                node_size=size_map,
+                node_color=color_map,
+                highlight_top=highlight_nodes,
+                highlight_selected=highlight_nodes_selected,
+                title="Centrality-scaled network",
+                show_labels=True,
+            )
 
     # Show information for selected nodes
     if selected_nodes:
