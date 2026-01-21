@@ -48,7 +48,7 @@ def page() -> None:
         Higher weight means more influence on the final optimisation score. 
         
         **Estimated number of effective arrests**   
-        The effective arrests are  the number of arrests possible that realistically can be carried out, considering the cross department edges, because information may leak between departments. 
+        The effective arrests are the number of arrests possible that realistically can be carried out, considering the cross department edges, because information may leak between departments. 
         
         **Visualization**  
         The network shows the result of the arrest optimisation. Nodes are colored by department assignment, and the risky edges are highlighted in red. If there are optional nodes to inspect, they are highlighted in pink and have a table on the bottom with their assigned department and number of risky edges. 
@@ -246,7 +246,8 @@ Selected nodes will:
         col_left, col_right = st.columns([3, 2], gap="large")
         
         with col_left:
-            st.subheader("Optimisation results")
+            st.subheader("Optimisation results", help = "The objective value indicates how good the optimisation run is. Higher values mean a better result. The effective arrests are the number of arrests possible that realistically can be carried out, considering the cross department edges." )
+        
             st.write(f"**Objective value:** {arrest_result.objective:.3f}")
             st.write(f"**Estimated number of effective arrests:** {arrest_result.effective_arrests:.1f}")
             
@@ -278,7 +279,7 @@ Selected nodes will:
             # Show list of risky edges
             if arrest_result.risk_edges:
                 df_risk = pd.DataFrame(arrest_result.risk_edges, columns=["u", "v"])
-                st.subheader("Edges across departments")
+                st.subheader("Edges across departments", help = "Edges across departments are considered risky because they connect members from different departments and may reduce the effectiveness of arrests.")
                 st.write(f"Number of Cross‑department edges: {arrest_result.cut_edges}")
                 df_risk["Member dept. 1"] = df_risk.apply(lambda row: row["u"] if arrest_result.assignment[row["u"]] == 0 else row["v"], axis=1)
                 df_risk["Member dept. 2"] = df_risk.apply(lambda row: row["u"] if arrest_result.assignment[row["u"]] == 1 else row["v"], axis=1)
@@ -299,7 +300,7 @@ Selected nodes will:
                     arrest_order_df,
                     arrest_result.risk_edges,
                 )
-        st.subheader("Recommended arrest order") 
+        st.subheader("Recommended arrest order", help ="The order of the arrest has effect on the number of possible arrests. This is based on the centrality score and the number of risky edges.") 
         col_left, col_right = st.columns([2, 2], gap="large") 
         with col_right:
             st.write(
@@ -338,7 +339,7 @@ Selected nodes will:
             display_network(
                 G,
                 node_color=node_color_default,  # alles standaard
-                title="Sequential arrest simulation",
+                title= "Arrest order outcome",
                 show_labels=True,
                 highlight_top = tipped_nodes,
                 highlight_arrested=arrested_nodes,

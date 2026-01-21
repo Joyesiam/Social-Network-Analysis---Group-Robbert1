@@ -3,6 +3,7 @@
 import streamlit as st
 import pandas as pd
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
+import matplotlib.patches as mpatches
 
 from dss.ui.state import init_state, get_state, set_state
 from dss.analytics.communities import compute_communities
@@ -13,7 +14,11 @@ from dss.analytics.roles import compute_roles
 
 def page() -> None:
     st.set_page_config(page_title="Community Clustering", layout="wide")
-    st.title("Community Clustering")
+    st.title("Community Clustering", help="""
+    On this page the network can be divided up into multiple clusters.
+    Each of these clusters have more communication within the cluster than outside of the cluster.
+    It can be used to detect different factions of the network.
+    """)
   
     init_state()
     G = get_state("graph")
@@ -111,12 +116,36 @@ def page() -> None:
  #   comm_result = get_state("community_results")[method]
     
     # Robustness analysis
-    runs = st.sidebar.slider("Number of perturbation runs", 10, 100, 50, help = "Select amount of perturbation runs, more runs = more certainty.")
+    runs = st.sidebar.slider("Number of perturbation runs", 10, 100, 50, help = "Select amount of perturbation runs. more runs = more certainty.")
     p = st.sidebar.slider("Fraction of edges to remove", 0.01, 0.30, 0.05, 0.01, help = "Select fraction of edged to be removes, more removal = more drastic changes to network.")
-    if st.sidebar.button("Run robustness test", help = "(re)run robustness test and update changes."):
-        robustness_result = perturbation_test(G, method=method, p=p, runs=runs, k=(k or 2))
-        set_state("robustness_result", robustness_result)
+    
     robustness_result = get_state("robustness_result")
+    # Auto-run once on page load
+    if robustness_result is None:
+        robustness_result = perturbation_test(
+            G,
+            method=method,
+            p=p,
+            runs=runs,
+            k=(k or 2),
+        )
+        set_state("robustness_result", robustness_result)
+    # Optional manual rerun
+    if st.sidebar.button("Run robustness test", help = "(re)run robustness test and update changes."):
+        robustness_result = perturbation_test(
+            G,
+            method=method,
+            p=p,
+            runs=runs,
+            k=(k or 2),
+        )
+        set_state("robustness_result", robustness_result)
+    
+    
+   # if st.sidebar.button("Run robustness test", help = "(re)run robustness test and update changes."):
+   #     robustness_result = perturbation_test(G, method=method, p=p, runs=runs, k=(k or 2))
+   #     set_state("robustness_result", robustness_result)
+   # robustness_result = get_state("robustness_result")
 
     # Allow user to select nodes for inspection
     # st.sidebar.subheader("Select nodes to inspect", )
@@ -142,14 +171,31 @@ Selected nodes will:
     # Display summary
     col_stats, col_plot = st.columns(2)
     with col_stats:
-        st.subheader("Community summary")
+        st.subheader("Community summary", 
+                     help= """
+Size = Amount of nodes in cluster
+
+Within Ratio = A measure of how internally connected the communities are, as oposed to connections outside of the community. 
+
+High within ratio: Community mostly communicates within the community. 
+
+Low within ratio: Community interacts heavily with other communities.
+"""
+                    )
         st.write(f"Modularity Q: {comm_result.modularity:.3f}")
         st.dataframe(comm_result.summary)
         
     with col_plot:
         # Network plot coloured by communities with node selection
         community_colors = {node: comm_result.labels[node] for node in G.nodes()}
-        st.subheader("Network coloured by communities")   
+        st.subheader("Network coloured by communities", help= """
+
+Visualisation of clustered network with selected method and parameters.
+
+Different colors represent different communities.
+"""
+                    )   
+        
         display_network(
             G,
             node_color=community_colors,
@@ -172,7 +218,14 @@ Selected nodes will:
             df_details["role"] = [role_result.labels[n] for n in selected_nodes]
         st.dataframe(df_details)
         
-    st.subheader("Robustness analysis")
+    st.subheader("Robustness analysis", 
+                 help= """
+
+Robustness analysis evaluates how stable the results of a network analysis are when the network is slightly altered or when different methods are applied. 
+
+A robust result indicates that the identified structure reflects meaningful patterns rather than noise or modeling choices.
+"""
+                )
     st.write("Click on Run Robustness Test in the side bar to (re)run robustness test")
     if robustness_result is not None:
         st.write(f"Average ARI across runs: {sum(robustness_result.ari_scores) / len(robustness_result.ari_scores):.3f}")
