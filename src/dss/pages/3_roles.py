@@ -211,7 +211,7 @@ def page() -> None:
 # - Appear in a detailed table at the bottom of this page
 # """
 #                 )
-            st.sidebar.multiselect(
+            selected_nodes = st.sidebar.multiselect(
                     "Select nodes to inspect",
                     options=list(G.nodes()),
                     default=[],
