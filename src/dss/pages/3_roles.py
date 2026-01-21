@@ -178,7 +178,7 @@ def page() -> None:
     else:
         role_result = get_state("role_result")
 
-    if method == "RolX":
+    if method == "-":
         st.text("RolX does not yet work in the current iteration of this DSS.")
     else:
         # Display similarity heatmap
