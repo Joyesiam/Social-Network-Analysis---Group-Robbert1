@@ -560,20 +560,6 @@ def page() -> None:
 
         
     with col_right:
-        if order:
-            st.markdown("### Kemeny constant after each removal", help="""
-                    The order of the removal of certain edges has an impact on the subsequent Kemeny values that the remaining edges contain. A certain edge can have a bigger impact on the information network if similar edges have already been removed. As such, the following graph shows the inpact of each edge removal per step.
-            """)
-            fig, ax = plt.subplots()
-            series = [base_k] + result.history
-            ax.plot(list(range(len(series))), series, marker="o")
-            ax.set_xlabel("Step")
-            ax.set_ylabel("Kemeny constant")
-            ax.grid()
-            ax.set_title("Kemeny constant versus removal steps")
-            st.pyplot(fig)
-
-        
         st.markdown("### Network view (after removing edges)")
         H = G.copy()
         for u, v in ordered_edges:
@@ -592,6 +578,19 @@ def page() -> None:
             show_labels=True,
             removed_edges=ordered_edges,
         )
+
+        if order:
+            st.markdown("### Kemeny constant after each removal", help="""
+                    The order of the removal of certain edges has an impact on the subsequent Kemeny values that the remaining edges contain. A certain edge can have a bigger impact on the information network if similar edges have already been removed. As such, the following graph shows the inpact of each edge removal per step.
+            """)
+            fig, ax = plt.subplots()
+            series = [base_k] + result.history
+            ax.plot(list(range(len(series))), series, marker="o")
+            ax.set_xlabel("Step")
+            ax.set_ylabel("Kemeny constant")
+            ax.grid()
+            ax.set_title("Kemeny constant versus removal steps")
+            st.pyplot(fig)
 
     # === HEATMAP GRAPH COMPUTATION (kept identical) ===
     G_heat = G.copy()
