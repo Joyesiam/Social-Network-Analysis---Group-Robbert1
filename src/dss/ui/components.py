@@ -5,7 +5,7 @@ the page code concise.  Components include network visualisation,
 tables, metrics cards and charts.
 """
 
-from typing import Any, Dict, Iterable, Optional, Tuple
+from typing import Any, Dict, Iterable, Optional, Tuple, List
 import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -81,6 +81,8 @@ def display_network(
     show_labels: bool = True,
     label_dict: Optional[Dict[Any, str]] = None,
     removed_edges: Optional[Iterable[Tuple[Any, Any]]] = None,
+    legend_items: Optional[List] = None,
+    highlight_arrested: Optional[Iterable[Any]] = None,
 ) -> None:
     """Render a network graph using Streamlit.
 
@@ -110,6 +112,9 @@ def display_network(
         Edges to overlay as visually "removed" (drawn as dashed red lines).
         Useful when you want to keep the overall structure visible while
         clearly indicating which connections were removed.
+    legend_items: list optional
+    items for in the legend
+    highlight_arrested : highlighted arreste members 
     """
     if G is None or G.number_of_nodes() == 0:
         st.info("No graph loaded.")
@@ -132,7 +137,17 @@ def display_network(
         show_labels=show_labels,
         label_dict=label_dict,
         removed_edges=removed_edges,
+        highlight_arrested = highlight_arrested,
     )
+    if legend_items:
+        ax = fig.axes[0]
+        ax.legend(
+            handles=legend_items,
+            loc="upper right",
+            frameon=True,
+            fontsize="small",
+        )
+
 
     st.pyplot(fig)
 

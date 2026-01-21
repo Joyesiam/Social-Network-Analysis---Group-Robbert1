@@ -26,6 +26,7 @@ def plot_network(
     show_labels: bool = True,
     label_dict: Optional[Dict[Any, str]] = None,
     removed_edges: Optional[Iterable[Tuple[Any, Any]]] = None,
+    highlight_arrested: Optional[Iterable[Any]] = None,
 ) -> plt.Figure:
     """Render a network plot using a fixed layout with optional labels.
 
@@ -210,6 +211,13 @@ def plot_network(
             draw_last=True,
         )
 
+    if highlight_arrested:
+        _draw_highlight_layer(
+            highlight_arrested,
+            outline_color="#0bd63e",
+            outline_width=2.6,
+            draw_last=True,
+        )
     # -------------------------
     # Draw edges (either heatmap or default)
     # -------------------------

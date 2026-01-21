@@ -9,6 +9,8 @@ from pulp import LpProblem, LpVariable, lpSum, LpMinimize, LpStatusOptimal, PULP
 from ..types import ArrestAssignmentResult
 from ..logging_config import get_logger
 
+from collections import Counter
+
 logger = get_logger(__name__)
 
 
@@ -224,6 +226,132 @@ def arrest_assignment(
     result = _heuristic_assignment(G, communities, centrality, capacity,weights)
     # result.effective_arrests = float(n - beta * result.cut_edges)
     return result
+
+    
+def compute_arrest_order(
+    G: nx.Graph,
+    assignment: Dict,
+    centrality: pd.Series,
+    risk_edges,
+    gamma: float = 1.0,
+) -> pd.DataFrame:
+    """
+    Compute a recommended arrest order based on centrality and risky edges.
+
+    Parameters
+    ----------
+    G : networkx.Graph
+        The network graph.
+    assignment : dict
+        Mapping node -> department (0 or 1).
+    centrality : pandas.Series
+        Centrality scores per node.
+    risk_edges : list of tuples
+        List of risky (cross-department) edges.
+    gamma : float, optional
+        Penalty weight for risky edges (default = 1.0).
+
+    Returns
+    -------
+    pandas.DataFrame
+        Table with arrest order and underlying scores.
+    """
+
+    # Count risky edges per node
+    risk_counts = Counter()
+    for u, v in risk_edges:
+        risk_counts[u] += 1
+        risk_counts[v] += 1
+
+    # Normalize centrality to [0, 1]
+    c_min, c_max = centrality.min(), centrality.max()
+    denom = c_max - c_min if c_max != c_min else 1.0
+    centrality_norm = (centrality - c_min) / denom
+
+    # Compute priority score
+    priority_score = {
+        node: centrality_norm.get(node, 0.0) - gamma * risk_counts.get(node, 0)
+        for node in G.nodes()
+    }
+
+    # Build arrest order table
+    df = pd.DataFrame({
+        "Node": list(G.nodes()),
+        "Dept.": [assignment[node] + 1 for node in G.nodes()],
+        "Centrality (norm.)": [centrality_norm.get(node, 0.0) for node in G.nodes()],
+        "Risky edges": [risk_counts.get(node, 0) for node in G.nodes()],
+        "Priority score": [priority_score[node] for node in G.nodes()],
+    })
+
+    df = df.sort_values("Priority score", ascending=False).reset_index(drop=True)
+    df["Arrest order"] = df.index + 1
+
+    return df
+
+
+
+def simulate_sequential_arrests(
+    G: nx.Graph,
+    arrest_order_df: pd.DataFrame,
+    risk_edges: List[Tuple],
+) -> pd.DataFrame:
+    """
+    Simulate a sequential arrest process with information leakage.
+
+    After arresting a member, all members connected via risky edges
+    become unavailable for arrest.
+
+    Parameters
+    ----------
+    G : networkx.Graph
+        The network graph.
+    arrest_order_df : pandas.DataFrame
+        Table sorted by arrest priority (must contain 'Node').
+    risk_edges : list of tuples
+        Risky cross-department edges.
+
+    Returns
+    -------
+    pandas.DataFrame
+        Arrest simulation results with feasibility status.
+    """
+
+    # Build adjacency list for risky edges
+    tipped_by = {}
+    for u, v in risk_edges:
+        tipped_by.setdefault(u, set()).add(v)
+        tipped_by.setdefault(v, set()).add(u)
+
+    arrested = set()
+    unavailable = set()
+    rows = []
+
+    for _, row in arrest_order_df.iterrows():
+        node = row["Node"]
+
+        if node in unavailable:
+            status = "Tipped"
+        else:
+            # Arrest succeeds
+            status = "Arrested"
+            arrested.add(node)
+
+            # Tip connected nodes
+            for tipped in tipped_by.get(node, []):
+                if tipped not in arrested:
+                    unavailable.add(tipped)
+
+        rows.append({
+            **row.to_dict(),
+            "Status": status,
+            "Tipped members": ", ".join(map(str, tipped_by.get(node, []))) if status == "Arrested" else ""
+        })
+
+    result_df = pd.DataFrame(rows)
+    result_df["Arrest step"] = range(1, len(result_df) + 1)
+
+    return result_df
+
 
 
 if __name__ == "__main__":
