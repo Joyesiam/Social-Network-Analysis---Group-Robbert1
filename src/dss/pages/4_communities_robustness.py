@@ -119,9 +119,21 @@ def page() -> None:
     robustness_result = get_state("robustness_result")
 
     # Allow user to select nodes for inspection
-    st.sidebar.subheader("Select nodes to inspect", )
+    # st.sidebar.subheader("Select nodes to inspect", )
+    # selected_nodes = st.sidebar.multiselect(
+    #     "Nodes", options=list(G.nodes()), default=[], help = "Select nodes based on number in the graph."
+    # )
     selected_nodes = st.sidebar.multiselect(
-        "Nodes", options=list(G.nodes()), default=[], help = "Select nodes based on number in the graph."
+        "Select nodes to inspect",
+        options=list(G.nodes()),
+        default=[],
+        help="""
+Select one or more nodes to inspect in detail.
+
+Selected nodes will:
+- Always be highlighted in the network view
+- Appear in a detailed table at the bottom of this page
+"""
     )
     # highlight_nodes = selected_nodes
     highlight_nodes_selected = list(selected_nodes)
