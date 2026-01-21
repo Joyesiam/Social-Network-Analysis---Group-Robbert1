@@ -250,24 +250,25 @@ def page() -> None:
                 st.pyplot(fig)
 
     with col_graph:
-        st.markdown("### Network view (after removals)", help = "This graph shows the network after the selected edges have been removed. It is similar to the heatmap graph, but the removed edges are highlighted in red.")
-        H = G.copy()
-        for u, v in ordered_edges:
-            if H.has_edge(u, v):
-                H.remove_edge(u, v)
-            elif (not H.is_directed()) and H.has_edge(v, u):
-                H.remove_edge(v, u)
+         if order:
+            st.markdown("### Network view (after removals)", help = "This graph shows the network after the selected edges have been removed. It is similar to the heatmap graph, but the removed edges are highlighted in red.")
+            H = G.copy()
+            for u, v in ordered_edges:
+                if H.has_edge(u, v):
+                    H.remove_edge(u, v)
+                elif (not H.is_directed()) and H.has_edge(v, u):
+                    H.remove_edge(v, u)
 
-        display_network(
-            H,
-            node_size=None,
-            node_color=None,
-            # highlight=[],
-            highlight_selected=[],
-            title="Graph after edge removals",
-            show_labels=True,
-            removed_edges=ordered_edges,
-        )
+            display_network(
+                H,
+                node_size=None,
+                node_color=None,
+                # highlight=[],
+                highlight_selected=[],
+                title="Graph after edge removals",
+                show_labels=True,
+                removed_edges=ordered_edges,
+            )
 
 
     # === BOTTOM: removal order table + reorder controls (1,1,3) ===
