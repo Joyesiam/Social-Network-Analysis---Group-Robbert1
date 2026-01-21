@@ -166,7 +166,7 @@ def page() -> None:
     '''
     compute_button = st.sidebar.button("Compute roles", help="Compute selected role identification method with specified parameters and clustering methods")
     if compute_button or get_state("role_result") is None:
-        with st.spinner("calculating...")
+        with st.spinner("calculating..."):
             # Compute centralities for summary statistics
             centralities = compute_centralities(G)
             role_result = compute_roles(
