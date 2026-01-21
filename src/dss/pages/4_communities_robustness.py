@@ -150,13 +150,7 @@ High within ratio: Community mostly communicates within the community.
 Low within ratio: Community interacts heavily with other communities.
 """
                     )
-        st.write(f"Modularity Q: {comm_result.modularity:.3f}", 
-                 help="""
-A measure of how well a network is partitioned into communities. 
-Value close to 1: indicates strong community structure. 
-Value close to 0: indicates weak community structure.
-"""
-        )
+        st.write(f"Modularity Q: {comm_result.modularity:.3f}")
         st.dataframe(comm_result.summary)
         
     with col_plot:
@@ -197,20 +191,8 @@ A robust result indicates that the identified structure reflects meaningful patt
                 )
     st.write("Click on Run Robustness Test in the side bar to (re)run robustness test")
     if robustness_result is not None:
-        st.write(f"Average ARI across runs: {sum(robustness_result.ari_scores) / len(robustness_result.ari_scores):.3f}", 
-                 help= """
-Measures the similarity between two clusterings while correcting for simularities that could occur by chance. 
-In this context, it is used to quantify how consistently communities are identified under network perturbations. 
-        
-ARI close to 1 = Robust method of community clustering. 
-ARI close to 0 = Community completely changes when perturbation test is applied
-"""
-                )
-        st.write(f"Average modularity drop: {sum(robustness_result.modularity_drops) / len(robustness_result.modularity_drops):.3f}", 
-                 help= """
-Average drop in modularity when perturbation test is applied.
-"""
-                )
+        st.write(f"Average ARI across runs: {sum(robustness_result.ari_scores) / len(robustness_result.ari_scores):.3f}")
+        st.write(f"Average modularity drop: {sum(robustness_result.modularity_drops) / len(robustness_result.modularity_drops):.3f}")
         col_hist, col_box = st.columns(2)
 
         with col_hist:
