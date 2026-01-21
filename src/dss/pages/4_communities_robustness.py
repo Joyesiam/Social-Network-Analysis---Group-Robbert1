@@ -145,8 +145,11 @@ Selected nodes will:
         st.subheader("Community summary", 
                      help= """
 Size = Amount of nodes in cluster
+
 Within Ratio = A measure of how internally connected the communities are, as oposed to connections outside of the community. 
+
 High within ratio: Community mostly communicates within the community. 
+
 Low within ratio: Community interacts heavily with other communities.
 """
                     )
@@ -157,7 +160,9 @@ Low within ratio: Community interacts heavily with other communities.
         # Network plot coloured by communities with node selection
         community_colors = {node: comm_result.labels[node] for node in G.nodes()}
         st.subheader("Network coloured by communities", help= """
+
 Visualisation of clustered network with selected method and parameters.
+
 Different colors represent different communities.
 """
                     )   
@@ -185,7 +190,9 @@ Different colors represent different communities.
         
     st.subheader("Robustness analysis", 
                  help= """
+
 Robustness analysis evaluates how stable the results of a network analysis are when the network is slightly altered or when different methods are applied. 
+
 A robust result indicates that the identified structure reflects meaningful patterns rather than noise or modeling choices.
 """
                 )
