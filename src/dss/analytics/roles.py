@@ -163,18 +163,11 @@ def _cluster_similarity_matrix(
         )
         labels = sc.fit_predict(similarity)
     elif method == "hierarchical":
-        try:
-            hc = AgglomerativeClustering(
-                n_clusters=n_clusters,
-                metric="precomputed",
-                linkage="average",
-            )
-        except TypeError:
-            hc = AgglomerativeClustering(
-                n_clusters=n_clusters,
-                affinity="precomputed",
-                linkage="average",
-            )
+        hc = AgglomerativeClustering(
+            n_clusters=n_clusters,
+            affinity="precomputed",
+            linkage="average",
+        )
         labels = hc.fit_predict(1.0 - similarity)
     else:
         raise ValueError(f"Unknown clustering method: {method}")
@@ -431,14 +424,25 @@ def transform_roles(roles,n_roles):
 
     newroles = {}
     for key in roles.keys():
-        for i in range(n_roles):
+        for i in range(n_roles+1):
             if roles[key] == f'role_{i}':
-                newroles[key] = i
+                if n_roles == 6:
+                    newroles[key] = i
+                else:
+                    if i == 0:
+                        newroles[key] = i
+                    else:
+                        newroles[key] = i-1
     return newroles
 
 def compute_rolx(G,n_roles,centrality_table):
     nodes = list(G.nodes())
-    role_extractor = RoleExtractor(n_roles=n_roles)
+    if n_roles == None:
+        role_extractor = RoleExtractor(n_roles=n_roles)
+    elif n_roles == 6:
+        role_extractor = RoleExtractor(n_roles=n_roles)
+    else:
+        role_extractor = RoleExtractor(n_roles=n_roles+1)
     role_extractor.extract_role_factors(centrality_table)
     labels = transform_roles(role_extractor.roles,n_roles)
     # Compute summary statistics per role
