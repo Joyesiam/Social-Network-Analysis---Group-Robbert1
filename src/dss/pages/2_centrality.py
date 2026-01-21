@@ -495,7 +495,7 @@ def page() -> None:
             st.sidebar.header("Measure scheme")
     
             # Initialize all toggles to True the first time we enter Borda mode
-            if not st.session_state.get("borda_toggles_initialized", False):
+            if not st.session_state.get("borda_toggles_initialized", None):
                 for col in df.columns:
                     st.session_state[f"borda_use_{col}"] = True
                 st.session_state.borda_toggles_initialized = True
