@@ -3,6 +3,7 @@
 import streamlit as st
 import pandas as pd
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
+import matplotlib.patches as mpatches
 
 from dss.ui.state import init_state, get_state, set_state
 from dss.analytics.communities import compute_communities
@@ -168,19 +169,31 @@ Different colors represent different communities.
                     )   
         
         
-        comm_colors = { 0: "#440154", 1: "#FDE725" }
-        legend_items = comm_colors
+        comm_colors = {
+        0: "#440154",
+        1: "#FDE725",
+        }
+
+        # Assign actual colors to nodes
+        community_colors = {
+            node: comm_colors[comm_result.labels[node]]
+            for node in G.nodes()
+        }
+
+        # Create legend handles
+        legend_items = [
+            mpatches.Patch(color=color, label=f"Community {comm + 1}")
+            for comm, color in comm_colors.items()
+        ]
 
         display_network(
-                G,
-                node_color=community_colors,
-                highlight_selected=highlight_nodes_selected,
-                title=f"Communities ({method})",
-                # highlight=selected_nodes
-                highlight_selected=highlight_nodes_selected,
-                show_labels=True,
-                legend_items = legend_items,
-            )
+            G,
+            node_color=community_colors,
+            highlight_selected=highlight_nodes_selected,
+            title=f"Communities ({method})",
+            show_labels=True,
+            legend_items=legend_items,
+        )
         
        # display_network(
        #     G,
