@@ -533,14 +533,7 @@ def page() -> None:
             st.info("Select edges above to start building a removal order.")
             return
 
-        order_df = pd.DataFrame({"Step": list(range(1, len(order) + 1)), "Edge removed": order})
-        order_df = pd.concat(
-            [pd.DataFrame({"Step": [0], "Edge removed": ["Baseline (no removal)"]}), order_df],
-            ignore_index=True,
-        )
-        st.dataframe(order_df, use_container_width=True, hide_index=True)
 
-    with col_right:
         if "kemeny_edge_active" not in st.session_state or st.session_state["kemeny_edge_active"] not in order:
             st.session_state["kemeny_edge_active"] = order[0]
 
@@ -553,7 +546,15 @@ def page() -> None:
             st.button("Down", use_container_width=True, on_click=_move_active, args=(+1,))
 
         st.button("Remove", use_container_width=True, on_click=_remove_active_edge)
+            
+        order_df = pd.DataFrame({"Step": list(range(1, len(order) + 1)), "Edge removed": order})
+        order_df = pd.concat(
+            [pd.DataFrame({"Step": [0], "Edge removed": ["Baseline (no removal)"]}), order_df],
+            ignore_index=True,
+        )
+        st.dataframe(order_df, use_container_width=True, hide_index=True)
 
+    with col_right:
         if order:
             st.markdown("### Kemeny constant after each removal")
             st.markdown(
