@@ -201,16 +201,28 @@ def page() -> None:
             # Plot network coloured by roles with labels and interactive highlights
             st.subheader("Network coloured by roles", help="Visual representation of the network, where each role has its own colour")
             # Node selection for highlight and inspection
-            st.sidebar.subheader("Select nodes to inspect")
-            selected_nodes = st.sidebar.multiselect(
-                options=list(G.nodes()), default=[], help="""
+#             st.sidebar.subheader("Select nodes to inspect")
+#             selected_nodes = st.sidebar.multiselect(
+#                 "Nodes", options=list(G.nodes()), default=[], help="""
+# Select one or more nodes to inspect in detail.
+
+# Selected nodes will:
+# - Always be highlighted in the network view
+# - Appear in a detailed table at the bottom of this page
+# """
+#                 )
+            st.sidebar.multiselect(
+                    "Select nodes to inspect",
+                    options=list(G.nodes()),
+                    default=[],
+                    help="""
 Select one or more nodes to inspect in detail.
 
 Selected nodes will:
 - Always be highlighted in the network view
 - Appear in a detailed table at the bottom of this page
 """
-                )
+            )
             # Highlight nodes that are selected
             # highlight_nodes = selected_nodes
             highlight_nodes_selected = list(selected_nodes)
