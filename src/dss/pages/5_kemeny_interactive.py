@@ -504,8 +504,8 @@ def page() -> None:
         kemeny_defined = after_k == after_k  # not NaN
         delta = (after_k - base_k) if kemeny_defined else None
         
-    with col_right:
-        pass
+    # with col_right:
+    #     pass
         
     with col_left:
         st.markdown("### List of highest impact edges")
