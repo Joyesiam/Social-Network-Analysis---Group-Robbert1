@@ -1035,7 +1035,11 @@ def leaderranking(df):
     for i in range(len(scores[0, :])):
         for j in range(len(scores[:, 0])):
             scores[j, i] = points[i] * (df.iloc[j, i] / maxima.iloc[i])
-    return pd.DataFrame(scores.T).mean()
+    
+    df = pd.DataFrame()
+    df['Leadership score'] = pd.DataFrame(scores.T).mean().to_numpy()
+    df.index.name = 'Role'
+    return df
 
 
 def compute_roles(
