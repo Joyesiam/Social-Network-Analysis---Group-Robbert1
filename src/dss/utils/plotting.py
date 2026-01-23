@@ -623,6 +623,8 @@ def plot_network(
     if title:
         ax.set_title(title)
 
+    import streamlit as st
+    st.write(G.is_directed())
     return fig
 
 
