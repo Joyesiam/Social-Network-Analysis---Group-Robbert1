@@ -130,7 +130,7 @@ subsequent pages can access it via `st.session_state`.
 import hashlib
 import streamlit as st
 import pandas as pd
-from dss.ui.state import init_state, set_state, get_state
+from dss.ui.state import init_state, set_state, get_state, clear_graph_state
 from dss.utils.io_mtx import load_mtx
 from dss.graph.build_graph import build_graph
 from dss.graph.stats import basic_statistics
@@ -207,32 +207,9 @@ def page() -> None:
         old_file_id = st.session_state.get("current_file_id")
 
         if old_file_id != new_file_id:
-            # Reset graph-dependent state keys
-            reset_keys = [
-                "graph",
-                "adjacency",
-                "layout",
-                "centrality_result",
-                "centrality_table",
-                "centrality_method",
-                "centrality_weights",
-                "borda_weights",
-                "roles_result",
-                "roles_table",
-                "communities_result",
-                "communities_table",
-                "kemeny_result",
-                "removed_edges",
-                "highlight_top",
-                "highlight_selected",
-                "highlight_arrested",
-            ]
-
-            for k in reset_keys:
-                if k in st.session_state:
-                    del st.session_state[k]
-
-            # If you use Streamlit caches anywhere for graph computations, clear them as well
+            clear_graph_state()
+            set_state("current_file_id", new_file_id)
+        
             try:
                 st.cache_data.clear()
             except Exception:
