@@ -26,7 +26,6 @@ def page() -> None:
         st.markdown(
             """
                 #### Welcome
-                
                 This dashboard allows you to analyze network structures using advanced graph-based methods.  
                 Everything starts by uploading a network file.
                 
