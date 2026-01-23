@@ -82,8 +82,8 @@ def compute_centralities(G: nx.Graph) -> pd.DataFrame:
     # Construct DataFrame
     df = pd.DataFrame(
         {
-            "degree": pd.Series(dict(G.degree())),
-            # "degree": pd.Series(deg),
+            # "degree": pd.Series(dict(G.degree())),
+            "degree": pd.Series(deg),
             "katz": pd.Series(katz),
             "eigenvector": pd.Series(eigen),
             "betweenness": pd.Series(between),
