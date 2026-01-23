@@ -189,11 +189,11 @@ def page() -> None:
         centrality_metric = centrality_metric_labels_single[centrality_metric_single]
     
     else: 
-    selected_nodes = st.sidebar.multiselect(
-        "Select nodes to inspect",
-        options=list(G.nodes()),
-        default=[],
-        help="""
+        selected_nodes = st.sidebar.multiselect(
+            "Select nodes to inspect",
+            options=list(G.nodes()),
+            default=[],
+            help="""
 Select one or more nodes to inspect in detail.
 
 Selected nodes will:
