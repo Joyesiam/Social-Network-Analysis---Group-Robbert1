@@ -188,12 +188,40 @@ def page() -> None:
         centrality_metric_single = st.sidebar.selectbox("Single centrality method", list(centrality_metric_labels_single.keys()), index=2, help = "Select the method that determines the centrality of the members of the network.")
         centrality_metric = centrality_metric_labels_single[centrality_metric_single]
     
-    else: 
-        selected_nodes = st.sidebar.multiselect(
-            "Select nodes to inspect",
-            options=list(G.nodes()),
-            default=[],
-            help="""
+    else:  #Combined methods
+        centrality_metric_labels_combined = {
+            "Weighted sum": "Weighted sum",
+            "Borda count": "Borda count"
+                    }
+        centrality_metric = st.sidebar.selectbox("Combined centrality method", list(centrality_metric_labels_combined.keys()), index=0, help = "Select the method that determines the centrality of the members of the network.")
+        centrality_metric = centrality_metric_labels_combined[centrality_metric]
+
+        if centrality_metric == "Weighted sum":
+            st.sidebar.header("Weighting scheme", help = "How important each centrality method is. Higer = more important.")
+            for col in df.columns:
+                weight_inputs[col] = st.sidebar.slider(f"Weight for {col}", 0.0, 1.0, 1.0, 0.1)
+            combined = combine_centralities(df, weights=weight_inputs)
+        
+        else: #Borda count
+            # Initialize all toggles to True the first time we enter Borda mode
+            if not st.session_state.get("borda_toggles_initialized", False):
+                for col in df.columns:
+                    st.session_state[f"borda_use_{col}"] = True
+                st.session_state.borda_toggles_initialized = True
+            st.sidebar.markdown(
+                "Toggle which metrics should be included in the Borda count aggregation. "
+                   )
+                   
+            for col in df.columns:
+                key = f"borda_use_{col}"
+                weight_inputs[col] = st.sidebar.toggle(label=str(col), key=key)
+
+            combined = borda_count(df, weight_inputs)
+    selected_nodes = st.sidebar.multiselect(
+        "Select nodes to inspect",
+        options=list(G.nodes()),
+        default=[],
+        help="""
 Select one or more nodes to inspect in detail.
 
 Selected nodes will:
@@ -228,8 +256,9 @@ Selected nodes will:
             st.subheader("Optimisation results", help = "The objective value indicates how good the optimisation run is. Lower values mean a better result. The effective arrests are the number of arrests possible that realistically can be carried out, considering the cross department edges." )
 
             current_objective = arrest_result.objective
-            if "last_objective" in st.session_state:
-                last_objective = st.session_state["last_objective"]
+            last_objective = st.session_state.get("last_objective")
+
+            if last_objective is not None:
                 delta_objective = current_objective - last_objective
                 st.metric(
                     label="Objective value", value=f"{current_objective:.3f}",
@@ -239,9 +268,6 @@ Selected nodes will:
 
             else:
                 st.metric(label="Objective value", value=f"{current_objective:.3f}",delta=None)
-                last_objective = current_objective
-
-            # st.metric("Objective value", f"{arrest_result.objective:.2f}")
             
             st.session_state["last_objective"] = current_objective
         
@@ -258,7 +284,6 @@ Selected nodes will:
             risky_line = mlines.Line2D([], [], color='red', linestyle='dashed', label='Risky edge')
             legend_items = team_patches + [risky_line]
         
-
             display_network(
                 G,
                 node_color=dept_colors,
