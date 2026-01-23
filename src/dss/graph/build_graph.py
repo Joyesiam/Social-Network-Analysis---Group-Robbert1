@@ -110,7 +110,8 @@ def build_graph(adjacency: csr_matrix, directed: Optional[bool] = None) -> nx.Gr
         # NetworkX automatically collapses symmetric edges for Graph
         # Self loops have been removed above
         G.add_edge(int(u), int(v))
-
+    import streamlit as st
+    st.write("ASYMMETRIC NNZ:", (adjacency != adjacency.T).nnz)
     return G
 
 
