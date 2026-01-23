@@ -535,20 +535,45 @@ def page() -> None:
 
         current_heat_k = kemeny_constant(G_heat)
 
-        edge_impacts = {}
-        for e in G_heat.edges():
-            result_heat = interactive_kemeny_edges(G_heat, [e], recompute_on_largest)
-            if result_heat.kemeny == result_heat.kemeny:
-                edge_impacts[e] = result_heat.kemeny - current_heat_k
-            else:
-                edge_impacts[e] = None
+        # edge_impacts = {}
+        # for e in G_heat.edges():
+        #     result_heat = interactive_kemeny_edges(G_heat, [e], recompute_on_largest)
+        #     if result_heat.kemeny == result_heat.kemeny:
+        #         edge_impacts[e] = result_heat.kemeny - current_heat_k
+        #     else:
+        #         edge_impacts[e] = None
 
-        display_network(
-            G_heat,
-            edge_color=edge_impacts,
-            title="Edge sensitivity heatmap (Change in Kemeny if removed)",
-            show_labels=True,
-        )
+        # display_network(
+        #     G_heat,
+        #     edge_color=edge_impacts,
+        #     title="Edge sensitivity heatmap (Change in Kemeny if removed)",
+        #     show_labels=True,
+        # )
+
+        # If all edges are removed, the heatmap is undefined
+        if G_heat.number_of_edges() == 0:
+            st.warning(
+                "You removed all edges. The edge sensitivity heatmap cannot be computed on an empty graph. "
+                "Please keep at least one edge or remove fewer edges."
+            )
+        else:
+            current_heat_k = kemeny_constant(G_heat)
+        
+            edge_impacts = {}
+            for e in G_heat.edges():
+                result_heat = interactive_kemeny_edges(G_heat, [e], recompute_on_largest)
+                if result_heat.kemeny == result_heat.kemeny:
+                    edge_impacts[e] = result_heat.kemeny - current_heat_k
+                else:
+                    edge_impacts[e] = None
+        
+            display_network(
+                G_heat,
+                edge_color=edge_impacts,
+                title="Edge sensitivity heatmap (Change in Kemeny if removed)",
+                show_labels=True,
+            )
+
 
     with col_left:
         st.markdown(
