@@ -5,8 +5,8 @@ from typing import Iterable
 import networkx as nx
 import pandas as pd
 
-from graphrole.graph.interface import BaseGraphInterface
-from graphrole.types import Edge, Node
+from dss.utils.graphrole.graph.interface import BaseGraphInterface
+from dss.utils.graphrole.types import Edge, Node
 
 
 class NetworkxInterface(BaseGraphInterface):
