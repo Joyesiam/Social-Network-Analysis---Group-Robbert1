@@ -93,12 +93,12 @@ def page() -> None:
         * **Modularity Q Score**: A measure of how well a network is partitioned into communities.
         * **Within Ratio**: A measure of how internally connected the communities are, as oposed to connections outside of the community.
 
-        ### Community clustering methods
+        #### Community clustering methods
         * **Spectral**: Identifies communities by using the eigenvectors of the graph Laplacian to partition the network into weakly connected groups. It is based on minimizing a graph-cut objective and is effective at revealing global structure in the network.
         * **Girvan-Newman**: Detects communities by repeatedly removing edges with high betweenness centrality, which act as bridges between groups. As these bridging edges are removed, the network splits into increasingly well-defined communities. 
         * **Louvain**: Detects communities by iteratively grouping nodes to maximize the modularity Q score. It is well suited for large networks and produces a hierarchical community structure.
 
-        ### Robustness Analysis
+        #### Robustness Analysis
         Robustness analysis evaluates how stable the results of a network analysis are when the network is slightly altered or when different methods are applied. 
         A robust result indicates that the identified structure reflects meaningful patterns rather than noise or modeling choices.
         * **Perturbation Test**: Assesses robustness by deliberately introducing small changes to the network, in this case removing some of the edges, and re-running the analysis. If the results remain largely unchanged, the detected structure is considered robust.
