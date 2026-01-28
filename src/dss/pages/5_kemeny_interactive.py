@@ -324,6 +324,7 @@ import streamlit as st
 import matplotlib.pyplot as plt
 import networkx as nx
 import pandas as pd
+import math
 
 from dss.ui.state import init_state, get_state
 from dss.ui.components import display_network
@@ -603,13 +604,17 @@ def page() -> None:
                         edge_impacts[e] = result_heat.kemeny - current_heat_k
                     else:
                         edge_impacts[e] = None
-        
-                display_network(
-                    G_heat,
-                    edge_color = edge_impacts,
-                    title = "Edge sensitivity heatmap (Change in Kemeny if removed)",
-                    show_labels = True,
-                )
+
+                if any(e is None for e in edge_impacts.values()):
+                    order = False
+                    st.info("No Kemeny calculations available. Please select the button: 'Recompute on largest component if disconnected.'")
+                else:
+                    display_network(
+                        G_heat,
+                        edge_color = edge_impacts,
+                        title = "Edge sensitivity heatmap (Change in Kemeny if removed)",
+                        show_labels = True,
+                    )
 
 
 
@@ -639,7 +644,7 @@ def page() -> None:
         if order:
             st.markdown(
                 "### Kemeny constant after each removal",
-                help="The order of the removal of certain edges has an impact on the subsequent Kemeny values that the remaining edges contain. A certain edge can have a bigger impact on the information network if similar edges have already been removed. As such, the following graph shows the inpact of each edge removal per step.",
+                help="The order of the removal of certain edges has an impact on the subsequent Kemeny values that the remaining edges contain. A certain edge can have a bigger impact on the information network if similar edges have already been removed. As such, the following graph shows the impact of each edge removal per step.",
             )
             fig, ax = plt.subplots()
             series = [base_k] + result.history
