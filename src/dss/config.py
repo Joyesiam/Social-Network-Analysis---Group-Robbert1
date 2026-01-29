@@ -37,7 +37,7 @@ class Defaults:
 
     # Random seed for reproducibility
     #seed: int = 55
-    seed: int = 37
+    seed: int = 36
 
 
 DEFAULTS = Defaults()
