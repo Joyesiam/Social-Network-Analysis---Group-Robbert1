@@ -39,13 +39,13 @@ def _compute_edge_weights(
     """
     weights: Dict[Tuple[Any, Any], float] = {}
     # Scale centrality to [0, 1] if provided
-    # if centrality is not None:
-    max_c = centrality.max()
-    min_c = centrality.min()
-    denom = max_c - min_c if max_c != min_c else 1.0
-    scaled_c = {n: (centrality[n] - min_c) / denom for n in G.nodes()}
-    # else:
-    #     scaled_c = {n: 0.0 for n in G.nodes()}
+    if centrality is not None:
+        max_c = centrality.max()
+        min_c = centrality.min()
+        denom = max_c - min_c if max_c != min_c else 1.0
+        scaled_c = {n: (centrality[n] - min_c) / denom for n in G.nodes()}
+    else:
+        scaled_c = {n: 0.0 for n in G.nodes()}
 
     for u, v in G.edges():
         w = 1.0
@@ -56,7 +56,8 @@ def _compute_edge_weights(
         # if centrality is not None:
         # w += alpha * (scaled_c[u] + scaled_c[v])
         w += beta * (scaled_c[u] + scaled_c[v])
-        weights[(u, v)] = w
+        edge = tuple(sorted((u, v)))  
+        weights[edge] = w
     return weights
 
 def compute_effective_arrests(n: int, risk_edges: List[Tuple[Any, Any]], weights: Dict[Tuple[Any, Any], float]) -> float:
@@ -64,7 +65,12 @@ def compute_effective_arrests(n: int, risk_edges: List[Tuple[Any, Any]], weights
     if not risk_edges:
         return float(n)
     max_weight = max(weights.values())
-    reduction = sum(weights[edge] / max_weight for edge in risk_edges)
+    reduction = 0.0
+
+    for u, v in risk_edges:
+        edge = tuple(sorted((u,v)))
+        # reduction = sum(weights[edge] / max_weight for edge in risk_edges)
+        reduction += weights[edge] / max_weight
     return max(0.0, n - reduction)
 
 def _solve_ilp(
@@ -85,7 +91,8 @@ def _solve_ilp(
     x = LpVariable.dicts("x", nodes, lowBound=0, upBound=1, cat="Binary")
     y = LpVariable.dicts("y", list(G.edges()), lowBound=0, upBound=1, cat="Binary")
     # Objective: sum w_ij y_ij
-    prob += lpSum(weights[(u, v)] * y[(u, v)] for (u, v) in G.edges())
+    # prob += lpSum(weights[(u, v)] * y[(u, v)] for (u, v) in G.edges())
+    prob += lpSum(weights[tuple(sorted((u, v)))] * y[(u, v)] for (u, v) in G.edges())
     # Capacity constraints: size of Dept1 <= capacity and Dept2 <= capacity
     prob += lpSum(x[node] for node in nodes) <= capacity
     prob += lpSum((1 - x[node]) for node in nodes) <= capacity
@@ -214,6 +221,14 @@ def arrest_assignment(
     """
     n = G.number_of_nodes()
     capacity = math.ceil(n / 2)
+
+    if centrality is not None and len(centrality) > 0:
+        c_min = centrality.min()
+        c_max = centrality.max()
+        denom = c_max - c_min if c_max != c_min else 1.0
+        centrality = (centrality - c_min) / denom
+    else:
+        centrality = pd.Series(0.0, index=G.nodes())
     weights = _compute_edge_weights(G, communities, centrality, alpha,beta)
     # Try exact ILP solution
     result = _solve_ilp(G, weights, capacity)
